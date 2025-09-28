@@ -20,20 +20,23 @@
       <form id="loginForm">
         <div class="form-group">
           <label class="form-label" for="loginEmail">Email Adres</label>
-          <input type="text" id="loginEmail" class="form-input" placeholder="Vul je email in" required autocomplete="username" title="Email adres">
+          <input type="text" id="loginEmail" class="form-input" required autocomplete="username" placeholder="vul je email in">
         </div>
         <div class="form-group">
           <label class="form-label" for="loginPassword">Wachtwoord</label>
-          <input type="password" id="loginPassword" class="form-input" placeholder="Vul je wachtwoord in" required autocomplete="current-password" title="Wachtwoord">
+          <input type="password" id="loginPassword" class="form-input" required autocomplete="current-password" placeholder="vul je wachtwoord in">
         </div>
-        <button type="submit" class="btn btn-primary btn-full">Inloggen</button>
+        <button type="submit" class="btn btn-primary btn-full">
+          Inloggen
+        </button>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Dashboard Screen -->
+<!-- Main Dashboard -->
 <div id="dashboardScreen" class="screen">
+  <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-brand">Security Monitoring System</div>
     <div class="nav-tabs">
@@ -44,7 +47,8 @@
     <div class="topbar-actions">
       <div class="user-menu">
         <button class="user-button" id="userMenuButton">
-          <span id="currentUserName">gebruiker</span> <span>▼</span>
+          <span id="currentUserName">gebruiker</span>
+          <span>▼</span>
         </button>
         <div id="userDropdown" class="user-dropdown">
           <a href="#" class="dropdown-item danger" id="logoutButton">🚪 Uitloggen</a>
@@ -61,13 +65,31 @@
         <p>Real-time monitoring van verdachte activiteiten</p>
       </div>
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-icon">🚨</div><div class="stat-number">3</div><div class="stat-label">Critical Incidents</div></div>
-        <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-number">7</div><div class="stat-label">Suspicious Activity</div></div>
-        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-number">2</div><div class="stat-label">Financial Anomalies</div></div>
-        <div class="stat-card"><div class="stat-icon">🔒</div><div class="stat-number">1</div><div class="stat-label">High-Risk Entries</div></div>
+        <div class="stat-card">
+          <div class="stat-icon">🚨</div>
+          <div class="stat-number">3</div>
+          <div class="stat-label">Critical Incidents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-number">7</div>
+          <div class="stat-label">Suspicious Activity</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-number">2</div>
+          <div class="stat-label">Financial Anomalies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔒</div>
+          <div class="stat-number">1</div>
+          <div class="stat-label">High-Risk Entries</div>
+        </div>
       </div>
       <div class="card">
-        <div class="card-header"><h2 class="card-title">Recent Security Events</h2></div>
+        <div class="card-header">
+          <h2 class="card-title">Recent Security Events</h2>
+        </div>
         <p>Hier komen de real-time security logs...</p>
       </div>
     </div>
@@ -81,13 +103,15 @@
         <p>Beheer toegang en permissies van gebruikers</p>
       </div>
       <div class="card">
-        <div class="card-header"><h2 class="card-title">Nieuwe Gebruiker Toevoegen</h2></div>
+        <div class="card-header">
+          <h2 class="card-title">Nieuwe Gebruiker Toevoegen</h2>
+        </div>
         <div id="addUserMessage" class="message"></div>
         <form id="addUserForm">
           <div class="form-grid">
             <div class="form-group">
               <label class="form-label" for="addUserEmail">Email/Gebruikersnaam</label>
-              <input type="text" id="addUserEmail" class="form-input" placeholder="Vul email in" required title="Email/Gebruikersnaam">
+              <input type="text" id="addUserEmail" class="form-input" required placeholder="email of username">
             </div>
             <div class="form-group">
               <label class="form-label" for="addUserRole">Rol</label>
@@ -100,9 +124,11 @@
           </div>
           <div class="form-group">
             <label class="form-label" for="addUserPassword">Tijdelijk Wachtwoord</label>
-            <input type="password" id="addUserPassword" class="form-input" placeholder="Vul wachtwoord in" required title="Tijdelijk wachtwoord">
+            <input type="password" id="addUserPassword" class="form-input" required placeholder="tijdelijk wachtwoord">
           </div>
-          <button type="submit" class="btn btn-success">👤 Gebruiker Toevoegen</button>
+          <button type="submit" class="btn btn-success">
+            👤 Gebruiker Toevoegen
+          </button>
         </form>
       </div>
       <div class="card">
@@ -112,7 +138,12 @@
         </div>
         <table class="user-table">
           <thead>
-            <tr><th>Email/Gebruiker</th><th>Rol</th><th>Laatst Actief</th><th>Acties</th></tr>
+            <tr>
+              <th>Email/Gebruiker</th>
+              <th>Rol</th>
+              <th>Laatst Actief</th>
+              <th>Acties</th>
+            </tr>
           </thead>
           <tbody id="userTableBody"></tbody>
         </table>
@@ -128,34 +159,40 @@
         <p>Personalisatie en account instellingen</p>
       </div>
       <div class="card">
-        <div class="card-header"><h2 class="card-title">Weergave</h2></div>
+        <div class="card-header">
+          <h2 class="card-title">Weergave</h2>
+        </div>
         <div class="setting-item">
           <div class="setting-info">
             <h4>Dark Mode</h4>
             <p>Schakel tussen licht en donker thema</p>
           </div>
-          <div class="theme-toggle" id="themeToggle"></div>
+          <div class="theme-toggle" id="themeToggle" title="Schakel thema"></div>
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><h2 class="card-title">Account</h2></div>
+        <div class="card-header">
+          <h2 class="card-title">Account</h2>
+        </div>
         <div id="passwordMessage" class="message"></div>
         <form id="passwordForm">
           <div class="form-group">
             <label class="form-label" for="currentPasswordInput">Huidig Wachtwoord</label>
-            <input type="password" id="currentPasswordInput" class="form-input" placeholder="Huidig wachtwoord" required autocomplete="current-password" title="Huidig wachtwoord">
+            <input type="password" id="currentPasswordInput" class="form-input" required autocomplete="current-password" placeholder="huidig wachtwoord">
           </div>
           <div class="form-grid">
             <div class="form-group">
               <label class="form-label" for="newPasswordInput">Nieuw Wachtwoord</label>
-              <input type="password" id="newPasswordInput" class="form-input" placeholder="Nieuw wachtwoord" required autocomplete="new-password" title="Nieuw wachtwoord">
+              <input type="password" id="newPasswordInput" class="form-input" required autocomplete="new-password" placeholder="nieuw wachtwoord">
             </div>
             <div class="form-group">
               <label class="form-label" for="confirmPasswordInput">Bevestig Nieuw Wachtwoord</label>
-              <input type="password" id="confirmPasswordInput" class="form-input" placeholder="Bevestig wachtwoord" required autocomplete="new-password" title="Bevestig wachtwoord">
+              <input type="password" id="confirmPasswordInput" class="form-input" required autocomplete="new-password" placeholder="bevestig wachtwoord">
             </div>
           </div>
-          <button type="submit" class="btn btn-primary">🔑 Wachtwoord Wijzigen</button>
+          <button type="submit" class="btn btn-primary">
+            🔑 Wachtwoord Wijzigen
+          </button>
         </form>
       </div>
     </div>
