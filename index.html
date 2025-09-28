@@ -1,95 +1,198 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Security Monitoring System</title>
-  <link rel="stylesheet" href="css/style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Monitoring System</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <!-- LOGIN -->
-  <div id="loginScreen" class="screen active">
-    <div class="login-container">
-      <h1>Security Monitoring System</h1>
-      <form id="loginForm" class="card">
-        <label>Email</label>
-        <input type="text" id="loginEmail" required />
-        <label>Wachtwoord</label>
-        <input type="password" id="loginPassword" required />
-        <button type="submit" class="btn btn-primary">Login</button>
-        <div id="loginMessage" class="message"></div>
+<!-- Login Screen -->
+<div id="loginScreen" class="screen active">
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-header">
+        <h1>🔐 Security Dashboard</h1>
+        <p>Toegang alleen voor geautoriseerd personeel</p>
+      </div>
+      <div id="loginMessage" class="message"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Email Adres</label>
+          <input type="text" id="loginEmail" class="form-input" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Wachtwoord</label>
+          <input type="password" id="loginPassword" class="form-input" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Inloggen</button>
       </form>
     </div>
   </div>
+</div>
 
-  <!-- DASHBOARD -->
-  <div id="dashboardScreen" class="screen">
-    <nav class="navbar">
-      <div class="logo">Security Monitoring</div>
-      <div class="nav-links">
-        <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
-        <button class="nav-tab" id="usersTabBtn" data-tab="users">Gebruikers</button>
-        <button class="nav-tab" data-tab="settings">Instellingen</button>
-      </div>
+<!-- Dashboard Screen -->
+<div id="dashboardScreen" class="screen">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-brand">Security Monitoring System</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="dashboard">📊 Dashboard</button>
+      <button class="nav-tab hidden" id="usersTabBtn" data-tab="users">👥 Gebruikers</button>
+      <button class="nav-tab" data-tab="settings">⚙️ Instellingen</button>
+    </div>
+    <div class="topbar-actions">
       <div class="user-menu">
-        <span id="currentUserName"></span>
-        <button id="userMenuButton">⚙️</button>
-        <div id="userDropdown" class="dropdown">
-          <button id="logoutButton">Uitloggen</button>
+        <button class="user-button" id="userMenuButton">
+          <span id="currentUserName">gebruiker</span> ▼
+        </button>
+        <div id="userDropdown" class="user-dropdown">
+          <a href="#" class="dropdown-item danger" id="logoutButton">🚪 Uitloggen</a>
         </div>
       </div>
-      <div id="themeToggle" class="theme-toggle"></div>
-    </nav>
+    </div>
+  </div>
 
-    <main class="main">
-      <!-- Dashboard -->
-      <section id="dashboardTab" class="main-content active">
-        <h2>Welkom bij het Security Monitoring System</h2>
-        <p>Hier komen beveiligingsgegevens en meldingen.</p>
-      </section>
+  <!-- Dashboard Tab -->
+  <div id="dashboardTab" class="main-content active">
+    <div class="container">
+      <div class="page-header">
+        <h1>Security Dashboard</h1>
+        <p>Real-time monitoring van verdachte activiteiten</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🚨</div>
+          <div class="stat-number">3</div>
+          <div class="stat-label">Critical Incidents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-number">7</div>
+          <div class="stat-label">Suspicious Activity</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-number">2</div>
+          <div class="stat-label">Financial Anomalies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔒</div>
+          <div class="stat-number">1</div>
+          <div class="stat-label">High-Risk Entries</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Recent Security Events</h2>
+        </div>
+        <p>Hier komen de real-time security logs...</p>
+      </div>
+    </div>
+  </div>
 
-      <!-- Gebruikers -->
-      <section id="usersTab" class="main-content">
-        <h2>Gebruikersbeheer</h2>
-        <div id="userCount"></div>
+  <!-- User Management Tab -->
+  <div id="usersTab" class="main-content">
+    <div class="container">
+      <div class="page-header">
+        <h1>Gebruikersbeheer</h1>
+        <p>Beheer toegang en permissies van gebruikers</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Nieuwe Gebruiker Toevoegen</h2>
+        </div>
+        <div id="addUserMessage" class="message"></div>
+        <form id="addUserForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Email/Gebruikersnaam</label>
+              <input type="text" id="addUserEmail" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Rol</label>
+              <select id="addUserRole" class="form-select" required>
+                <option value="">Selecteer rol</option>
+                <option value="viewer">Kijker</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tijdelijk Wachtwoord</label>
+            <input type="password" id="addUserPassword" class="form-input" required>
+          </div>
+          <button type="submit" class="btn btn-success">👤 Gebruiker Toevoegen</button>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Bestaande Gebruikers</h2>
+          <span id="userCount">0 gebruikers</span>
+        </div>
         <table class="user-table">
           <thead>
             <tr>
-              <th>Email</th><th>Rol</th><th>Laatst actief</th><th>Acties</th>
+              <th>Email/Gebruiker</th>
+              <th>Rol</th>
+              <th>Laatst Actief</th>
+              <th>Acties</th>
             </tr>
           </thead>
           <tbody id="userTableBody"></tbody>
         </table>
-
-        <h3>Nieuwe gebruiker toevoegen</h3>
-        <form id="addUserForm">
-          <input type="text" id="addUserEmail" placeholder="Email" />
-          <input type="text" id="addUserPassword" placeholder="Wachtwoord" />
-          <select id="addUserRole">
-            <option value="viewer">Kijker</option>
-            <option value="admin">Administrator</option>
-          </select>
-          <button type="submit" class="btn btn-primary">Toevoegen</button>
-        </form>
-        <div id="addUserMessage" class="message"></div>
-      </section>
-
-      <!-- Instellingen -->
-      <section id="settingsTab" class="main-content">
-        <h2>Instellingen</h2>
-        <h3>Wachtwoord wijzigen</h3>
-        <form id="passwordForm">
-          <input type="password" id="currentPasswordInput" placeholder="Huidig wachtwoord" />
-          <input type="password" id="newPasswordInput" placeholder="Nieuw wachtwoord" />
-          <input type="password" id="confirmPasswordInput" placeholder="Bevestig nieuw wachtwoord" />
-          <button type="submit" class="btn btn-primary">Wijzigen</button>
-        </form>
-        <div id="passwordMessage" class="message"></div>
-      </section>
-    </main>
+      </div>
+    </div>
   </div>
 
-  <script src="js/app.js"></script>
+  <!-- Settings Tab -->
+  <div id="settingsTab" class="main-content">
+    <div class="container">
+      <div class="page-header">
+        <h1>Instellingen</h1>
+        <p>Personalisatie en account instellingen</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Weergave</h2>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Dark Mode</h4>
+            <p>Schakel tussen licht en donker thema</p>
+          </div>
+          <div class="theme-toggle" id="themeToggle"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Account</h2>
+        </div>
+        <div id="passwordMessage" class="message"></div>
+        <form id="passwordForm">
+          <div class="form-group">
+            <label class="form-label">Huidig Wachtwoord</label>
+            <input type="password" id="currentPasswordInput" class="form-input" required autocomplete="current-password">
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nieuw Wachtwoord</label>
+              <input type="password" id="newPasswordInput" class="form-input" required autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bevestig Nieuw Wachtwoord</label>
+              <input type="password" id="confirmPasswordInput" class="form-input" required autocomplete="new-password">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">🔑 Wachtwoord Wijzigen</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
+<script src="js/app.js"></script>
 </body>
 </html>
