@@ -1,33 +1,57 @@
 const App = {
     data: {
-        users: [], // wordt geladen van JSONBin
+        users: [],
         currentUser: null,
         isDarkMode: true
     },
-    jsonbin: {
-        binId: "YOUR_BIN_ID", // vervang dit door je JSONBin bin ID
-        secretKey: "YOUR_SECRET_KEY", // vervang dit door je JSONBin secret
-        async load() {
+    config: {
+        JSONBIN_ID: 'YOUR_BIN_ID',          // Zet hier je JSONBin ID
+        JSONBIN_KEY: 'YOUR_SECRET_KEY'      // Zet hier je X-Master-Key
+    },
+    storage: {
+        saveLocal() {
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${this.binId}/latest`, {
-                    headers: { "X-Master-Key": this.secretKey }
+                localStorage.setItem('AppData', JSON.stringify(App.data));
+            } catch (e) {
+                console.error('Opslaan lokaal mislukt:', e);
+            }
+        },
+        loadLocal() {
+            try {
+                const storedData = localStorage.getItem('AppData');
+                if (storedData) App.data = JSON.parse(storedData);
+            } catch (e) {
+                console.error('Laden lokaal mislukt:', e);
+            }
+        }
+    },
+    remote: {
+        async loadFromJSONBin() {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${App.config.JSONBIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': App.config.JSONBIN_KEY }
                 });
                 const json = await res.json();
-                if (json && json.record) App.data.users = json.record.users || [];
-            } catch (e) { console.error("JSONBin laden mislukt:", e); }
+                if (json.record) App.data = json.record;
+            } catch (e) {
+                console.error('Laden JSONBin mislukt:', e);
+            }
         },
-        async save() {
+        async saveToJSONBin() {
             try {
-                await fetch(`https://api.jsonbin.io/v3/b/${this.binId}`, {
-                    method: "PUT",
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${App.config.JSONBIN_ID}`, {
+                    method: 'PUT',
                     headers: {
-                        "Content-Type": "application/json",
-                        "X-Master-Key": this.secretKey,
-                        "X-Bin-Versioning": "false"
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': App.config.JSONBIN_KEY
                     },
-                    body: JSON.stringify({ users: App.data.users })
+                    body: JSON.stringify(App.data)
                 });
-            } catch (e) { console.error("JSONBin opslaan mislukt:", e); }
+                const json = await res.json();
+                console.log('Opgeslagen op JSONBin', json);
+            } catch (e) {
+                console.error('Opslaan JSONBin mislukt:', e);
+            }
         }
     },
     ui: {
@@ -57,41 +81,43 @@ const App = {
             document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
             const btn = document.querySelector(`[data-tab="${tab}"]`);
             if (btn) btn.classList.add('active');
-            if (tab === 'staff') App.ui.refreshStaffTable();
+            if (tab === 'users') App.ui.refreshUserTable();
         },
         updateUserDisplay() {
             const userNameEl = document.getElementById('currentUserName');
-            const staffTabBtn = document.getElementById('staffTabBtn');
+            const usersTabBtn = document.getElementById('usersTabBtn');
             if (App.data.currentUser) {
                 userNameEl.textContent = App.data.currentUser.email;
-                if (App.data.currentUser.role === 'admin') staffTabBtn.classList.remove('hidden');
-                else staffTabBtn.classList.add('hidden');
+                if (App.data.currentUser.role === 'admin') usersTabBtn.classList.remove('hidden');
+                else usersTabBtn.classList.add('hidden');
             }
         },
-        refreshStaffTable() {
-            const tbody = document.getElementById('staffTableBody');
-            const countEl = document.getElementById('staffCount');
+        refreshUserTable() {
+            const tbody = document.getElementById('userTableBody');
+            const countEl = document.getElementById('userCount');
             if (!tbody || !countEl) return;
             tbody.innerHTML = '';
-            countEl.textContent = `${App.data.users.length} staff`;
+            countEl.textContent = `${App.data.users.length} gebruiker${App.data.users.length !== 1 ? 's' : ''}`;
             App.data.users.forEach((user, index) => {
                 const row = document.createElement('tr');
                 const lastActive = new Date(user.lastActive).toLocaleString('nl-NL');
                 const isCurrentUser = App.data.currentUser && App.data.currentUser.email === user.email;
                 row.innerHTML = `
                     <td>${user.email}</td>
-                    <td>${user.role === 'admin' ? 'Administrator' : 'Kijker'}</td>
+                    <td><span class="role-badge ${user.role}">${user.role === 'admin' ? 'Administrator' : 'Kijker'}</span></td>
                     <td>${lastActive}</td>
                     <td>
-                        ${!isCurrentUser ? `<button class="btn btn-danger btn-small delete-staff-btn" data-index="${index}">Verwijder</button>` : '<em>Huidige gebruiker</em>'}
+                        <div class="user-actions">
+                        ${!isCurrentUser ? `<button class="btn btn-danger btn-small delete-user-btn" data-user-index="${index}">Verwijder</button>` : '<em>Huidige gebruiker</em>'}
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
-            document.querySelectorAll('.delete-staff-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const idx = parseInt(btn.getAttribute('data-index'));
-                    App.auth.removeStaff(idx);
+            document.querySelectorAll('.delete-user-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const userIndex = parseInt(this.getAttribute('data-user-index'));
+                    App.auth.removeUser(userIndex);
                 });
             });
         },
@@ -105,7 +131,8 @@ const App = {
                 document.body.setAttribute('data-theme', 'light');
                 toggle.classList.add('active');
             }
-            App.jsonbin.save();
+            App.storage.saveLocal();
+            App.remote.saveToJSONBin();
         },
         toggleUserMenu() {
             document.getElementById('userDropdown').classList.toggle('show');
@@ -117,7 +144,8 @@ const App = {
             if (user) {
                 user.lastActive = new Date().toISOString();
                 App.data.currentUser = {...user};
-                App.jsonbin.save();
+                App.storage.saveLocal();
+                App.remote.saveToJSONBin();
                 App.ui.showDashboard();
                 return true;
             } else {
@@ -127,31 +155,40 @@ const App = {
         },
         logout() {
             App.data.currentUser = null;
+            App.storage.saveLocal();
+            App.remote.saveToJSONBin();
             App.ui.showLogin();
+            document.getElementById('userDropdown').classList.remove('show');
         },
-        addStaff(email, password, role) {
+        addUser(email, password, role) {
             if (!email || !password || !role) {
-                App.ui.showMessage('addStaffMessage','Alle velden zijn verplicht');
+                App.ui.showMessage('addUserMessage','Alle velden zijn verplicht');
                 return false;
             }
             if (App.data.users.find(u => u.email === email)) {
-                App.ui.showMessage('addStaffMessage','Staff met dit email bestaat al');
+                App.ui.showMessage('addUserMessage','Gebruiker met dit email bestaat al');
+                return false;
+            }
+            if (password.length < 3) {
+                App.ui.showMessage('addUserMessage','Wachtwoord moet minimaal 3 karakters lang zijn');
                 return false;
             }
             App.data.users.push({email,password,role,lastActive:new Date().toISOString()});
-            App.jsonbin.save();
-            App.ui.refreshStaffTable();
-            App.ui.showMessage('addStaffMessage',`Staff ${email} toegevoegd`,'success');
-            document.getElementById('addStaffForm').reset();
+            App.storage.saveLocal();
+            App.remote.saveToJSONBin();
+            App.ui.refreshUserTable();
+            App.ui.showMessage('addUserMessage',`Gebruiker ${email} succesvol toegevoegd`,'success');
+            document.getElementById('addUserForm').reset();
             return true;
         },
-        removeStaff(index) {
+        removeUser(index) {
             if (index < 0 || index >= App.data.users.length) return;
             const user = App.data.users[index];
             App.data.users.splice(index,1);
-            App.jsonbin.save();
-            App.ui.refreshStaffTable();
-            App.ui.showMessage('addStaffMessage',`Staff ${user.email} verwijderd`,'success');
+            App.storage.saveLocal();
+            App.remote.saveToJSONBin();
+            App.ui.refreshUserTable();
+            App.ui.showMessage('addUserMessage',`Gebruiker ${user.email} verwijderd`,'success');
         },
         changePassword(currentPassword, newPassword, confirmPassword) {
             if (!App.data.currentUser) return false;
@@ -163,17 +200,26 @@ const App = {
                 App.ui.showMessage('passwordMessage','Nieuwe wachtwoorden komen niet overeen');
                 return false;
             }
+            if (newPassword.length < 3) {
+                App.ui.showMessage('passwordMessage','Wachtwoord moet minimaal 3 karakters lang zijn');
+                return false;
+            }
             App.data.currentUser.password = newPassword;
-            const idx = App.data.users.findIndex(u => u.email === App.data.currentUser.email);
-            if (idx !== -1) App.data.users[idx].password = newPassword;
-            App.jsonbin.save();
+            const userIndex = App.data.users.findIndex(u => u.email === App.data.currentUser.email);
+            if (userIndex !== -1) App.data.users[userIndex].password = newPassword;
+
+            App.storage.saveLocal();
+            App.remote.saveToJSONBin();
             App.ui.showMessage('passwordMessage','Wachtwoord succesvol gewijzigd','success');
             document.getElementById('passwordForm').reset();
             return true;
         }
     },
-    init: async function() {
-        await App.jsonbin.load();
+    async init() {
+        // Laad data eerst lokaal, daarna overschrijf van JSONBin
+        App.storage.loadLocal();
+        await App.remote.loadFromJSONBin();
+        App.storage.saveLocal(); // sync lokaal
 
         if (!App.data.isDarkMode) {
             document.body.setAttribute('data-theme', 'light');
@@ -187,12 +233,12 @@ const App = {
             App.auth.login(email,password);
         });
 
-        document.getElementById('addStaffForm')?.addEventListener('submit', e => {
+        document.getElementById('addUserForm')?.addEventListener('submit', e => {
             e.preventDefault();
-            const email = document.getElementById('addStaffEmail').value.trim();
-            const password = document.getElementById('addStaffPassword').value;
-            const role = document.getElementById('addStaffRole').value;
-            App.auth.addStaff(email,password,role);
+            const email = document.getElementById('addUserEmail').value.trim();
+            const password = document.getElementById('addUserPassword').value;
+            const role = document.getElementById('addUserRole').value;
+            App.auth.addUser(email,password,role);
         });
 
         document.getElementById('passwordForm')?.addEventListener('submit', e => {
