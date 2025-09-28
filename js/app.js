@@ -1,49 +1,57 @@
 const App = {
     data: {
-        users: [
-            { email: 'mees', password: 'mees', role: 'admin', lastActive: new Date().toISOString() },
-            { email: 'demo', password: 'demo', role: 'viewer', lastActive: new Date().toISOString() }
-        ],
+        users: [],
         currentUser: null,
         isDarkMode: true
     },
-    jsonbin: {
-        binId: "68d9759343b1c97be9534096", // <---- vul hier je JSONBin bin ID in
-        masterKey: "$2a$10$DTiU3hcuglHpTy/sU3hUKuHWnX7exTTkb6/eahL2zr9cyIwo9feTK", // <---- vul hier je secret key in
-        async save() {
+    config: {
+        JSONBIN_ID: '68d9759343b1c97be9534096',          // Zet hier je JSONBin ID
+        JSONBIN_KEY: '$2a$10$DTiU3hcuglHpTy/sU3hUKuHWnX7exTTkb6/eahL2zr9cyIwo9feTK'      // Zet hier je X-Master-Key
+    },
+    storage: {
+        saveLocal() {
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${this.binId}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Master-Key": this.masterKey
-                    },
-                    body: JSON.stringify(App.data)
-                });
-                if (!res.ok) throw new Error("JSONBin save failed");
-                console.log("Data succesvol geüpdatet op JSONBin");
+                localStorage.setItem('AppData', JSON.stringify(App.data));
             } catch (e) {
-                console.error(e);
+                console.error('Opslaan lokaal mislukt:', e);
             }
         },
-        async load() {
+        loadLocal() {
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${this.binId}/latest`, {
-                    method: "GET",
-                    headers: { "X-Master-Key": this.masterKey }
-                });
-                const json = await res.json();
-                if (json && json.record) App.data = json.record;
+                const storedData = localStorage.getItem('AppData');
+                if (storedData) App.data = JSON.parse(storedData);
             } catch (e) {
-                console.error("Fout bij laden van JSONBin:", e);
+                console.error('Laden lokaal mislukt:', e);
             }
         }
     },
-    storage: {
-        save() { localStorage.setItem('AppData', JSON.stringify(App.data)); },
-        load() {
-            const stored = localStorage.getItem('AppData');
-            if (stored) App.data = JSON.parse(stored);
+    remote: {
+        async loadFromJSONBin() {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${App.config.JSONBIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': App.config.JSONBIN_KEY }
+                });
+                const json = await res.json();
+                if (json.record) App.data = json.record;
+            } catch (e) {
+                console.error('Laden JSONBin mislukt:', e);
+            }
+        },
+        async saveToJSONBin() {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${App.config.JSONBIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': App.config.JSONBIN_KEY
+                    },
+                    body: JSON.stringify(App.data)
+                });
+                const json = await res.json();
+                console.log('Opgeslagen op JSONBin', json);
+            } catch (e) {
+                console.error('Opslaan JSONBin mislukt:', e);
+            }
         }
     },
     ui: {
@@ -123,19 +131,21 @@ const App = {
                 document.body.setAttribute('data-theme', 'light');
                 toggle.classList.add('active');
             }
-            App.storage.save();
-            App.jsonbin.save();
+            App.storage.saveLocal();
+            App.remote.saveToJSONBin();
         },
-        toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
+        toggleUserMenu() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        }
     },
     auth: {
-        login(email,password) {
+        login(email, password) {
             const user = App.data.users.find(u => u.email === email && u.password === password);
             if (user) {
                 user.lastActive = new Date().toISOString();
                 App.data.currentUser = {...user};
-                App.storage.save();
-                App.jsonbin.save();
+                App.storage.saveLocal();
+                App.remote.saveToJSONBin();
                 App.ui.showDashboard();
                 return true;
             } else {
@@ -145,21 +155,29 @@ const App = {
         },
         logout() {
             App.data.currentUser = null;
-            App.storage.save();
-            App.jsonbin.save();
+            App.storage.saveLocal();
+            App.remote.saveToJSONBin();
             App.ui.showLogin();
             document.getElementById('userDropdown').classList.remove('show');
         },
-        addUser(email,password,role) {
-            if (!email || !password || !role) { App.ui.showMessage('addUserMessage','Alle velden zijn verplicht'); return false; }
-            if (App.data.users.find(u => u.email === email)) { App.ui.showMessage('addUserMessage','Gebruiker bestaat al'); return false; }
-            if (password.length < 3) { App.ui.showMessage('addUserMessage','Wachtwoord minimaal 3 karakters'); return false; }
-
+        addUser(email, password, role) {
+            if (!email || !password || !role) {
+                App.ui.showMessage('addUserMessage','Alle velden zijn verplicht');
+                return false;
+            }
+            if (App.data.users.find(u => u.email === email)) {
+                App.ui.showMessage('addUserMessage','Gebruiker met dit email bestaat al');
+                return false;
+            }
+            if (password.length < 3) {
+                App.ui.showMessage('addUserMessage','Wachtwoord moet minimaal 3 karakters lang zijn');
+                return false;
+            }
             App.data.users.push({email,password,role,lastActive:new Date().toISOString()});
-            App.storage.save();
-            App.jsonbin.save();
+            App.storage.saveLocal();
+            App.remote.saveToJSONBin();
             App.ui.refreshUserTable();
-            App.ui.showMessage('addUserMessage',`Gebruiker ${email} toegevoegd`,'success');
+            App.ui.showMessage('addUserMessage',`Gebruiker ${email} succesvol toegevoegd`,'success');
             document.getElementById('addUserForm').reset();
             return true;
         },
@@ -167,34 +185,44 @@ const App = {
             if (index < 0 || index >= App.data.users.length) return;
             const user = App.data.users[index];
             App.data.users.splice(index,1);
-            App.storage.save();
-            App.jsonbin.save();
+            App.storage.saveLocal();
+            App.remote.saveToJSONBin();
             App.ui.refreshUserTable();
             App.ui.showMessage('addUserMessage',`Gebruiker ${user.email} verwijderd`,'success');
         },
-        changePassword(currentPassword,newPassword,confirmPassword) {
+        changePassword(currentPassword, newPassword, confirmPassword) {
             if (!App.data.currentUser) return false;
-            if (currentPassword !== App.data.currentUser.password) { App.ui.showMessage('passwordMessage','Huidig wachtwoord incorrect'); return false; }
-            if (newPassword !== confirmPassword) { App.ui.showMessage('passwordMessage','Nieuwe wachtwoorden komen niet overeen'); return false; }
-            if (newPassword.length < 3) { App.ui.showMessage('passwordMessage','Wachtwoord minimaal 3 karakters'); return false; }
-
+            if (currentPassword !== App.data.currentUser.password) {
+                App.ui.showMessage('passwordMessage','Huidig wachtwoord is incorrect');
+                return false;
+            }
+            if (newPassword !== confirmPassword) {
+                App.ui.showMessage('passwordMessage','Nieuwe wachtwoorden komen niet overeen');
+                return false;
+            }
+            if (newPassword.length < 3) {
+                App.ui.showMessage('passwordMessage','Wachtwoord moet minimaal 3 karakters lang zijn');
+                return false;
+            }
             App.data.currentUser.password = newPassword;
             const userIndex = App.data.users.findIndex(u => u.email === App.data.currentUser.email);
             if (userIndex !== -1) App.data.users[userIndex].password = newPassword;
-            App.storage.save();
-            App.jsonbin.save();
 
+            App.storage.saveLocal();
+            App.remote.saveToJSONBin();
             App.ui.showMessage('passwordMessage','Wachtwoord succesvol gewijzigd','success');
             document.getElementById('passwordForm').reset();
             return true;
         }
     },
     async init() {
-        await App.jsonbin.load(); // laad online data eerst
-        App.storage.load(); // fallback lokaal
+        // Laad data eerst lokaal, daarna overschrijf van JSONBin
+        App.storage.loadLocal();
+        await App.remote.loadFromJSONBin();
+        App.storage.saveLocal(); // sync lokaal
 
         if (!App.data.isDarkMode) {
-            document.body.setAttribute('data-theme','light');
+            document.body.setAttribute('data-theme', 'light');
             document.getElementById('themeToggle')?.classList.add('active');
         }
 
