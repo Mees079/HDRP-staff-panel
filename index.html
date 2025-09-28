@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
 <!-- Login Screen -->
 <div id="loginScreen" class="screen active">
   <div class="login-container">
@@ -18,22 +19,20 @@
       <div id="loginMessage" class="message"></div>
       <form id="loginForm">
         <div class="form-group">
-          <label class="form-label">Email Adres</label>
-          <input type="text" id="loginEmail" class="form-input" required autocomplete="username">
+          <label for="loginEmail" class="form-label">Email Adres</label>
+          <input type="text" id="loginEmail" class="form-input" required placeholder="Typ je email" title="Email">
         </div>
         <div class="form-group">
-          <label class="form-label">Wachtwoord</label>
-          <input type="password" id="loginPassword" class="form-input" required autocomplete="current-password">
+          <label for="loginPassword" class="form-label">Wachtwoord</label>
+          <input type="password" id="loginPassword" class="form-input" required placeholder="Typ je wachtwoord" title="Wachtwoord">
         </div>
-        <button type="submit" class="btn btn-primary btn-full">
-          Inloggen
-        </button>
+        <button type="submit" class="btn btn-primary btn-full">Inloggen</button>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Main Dashboard -->
+<!-- Dashboard Screen -->
 <div id="dashboardScreen" class="screen">
   <!-- Topbar -->
   <div class="topbar">
@@ -94,7 +93,7 @@
     </div>
   </div>
 
-  <!-- User Management Tab -->
+  <!-- Users Tab -->
   <div id="usersTab" class="main-content">
     <div class="container">
       <div class="page-header">
@@ -109,12 +108,12 @@
         <form id="addUserForm">
           <div class="form-grid">
             <div class="form-group">
-              <label class="form-label">Email/Gebruikersnaam</label>
-              <input type="text" id="addUserEmail" class="form-input" required>
+              <label for="addUserEmail" class="form-label">Email/Gebruikersnaam</label>
+              <input type="text" id="addUserEmail" class="form-input" required placeholder="Typ email" title="Email/Gebruikersnaam">
             </div>
             <div class="form-group">
-              <label class="form-label">Rol</label>
-              <select id="addUserRole" class="form-select" required>
+              <label for="addUserRole" class="form-label">Rol</label>
+              <select id="addUserRole" class="form-select" required title="Selecteer rol">
                 <option value="">Selecteer rol</option>
                 <option value="viewer">Kijker</option>
                 <option value="admin">Administrator</option>
@@ -122,12 +121,10 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Tijdelijk Wachtwoord</label>
-            <input type="password" id="addUserPassword" class="form-input" required>
+            <label for="addUserPassword" class="form-label">Tijdelijk Wachtwoord</label>
+            <input type="password" id="addUserPassword" class="form-input" required placeholder="Typ wachtwoord" title="Tijdelijk wachtwoord">
           </div>
-          <button type="submit" class="btn btn-success">
-            👤 Gebruiker Toevoegen
-          </button>
+          <button type="submit" class="btn btn-success">👤 Gebruiker Toevoegen</button>
         </form>
       </div>
       <div class="card">
@@ -144,8 +141,7 @@
               <th>Acties</th>
             </tr>
           </thead>
-          <tbody id="userTableBody">
-          </tbody>
+          <tbody id="userTableBody"></tbody>
         </table>
       </div>
     </div>
@@ -177,28 +173,26 @@
         <div id="passwordMessage" class="message"></div>
         <form id="passwordForm">
           <div class="form-group">
-            <label class="form-label">Huidig Wachtwoord</label>
-            <input type="password" id="currentPasswordInput" class="form-input" required autocomplete="current-password">
+            <label for="currentPasswordInput" class="form-label">Huidig Wachtwoord</label>
+            <input type="password" id="currentPasswordInput" class="form-input" required placeholder="Huidig wachtwoord" title="Huidig wachtwoord">
           </div>
           <div class="form-grid">
             <div class="form-group">
-              <label class="form-label">Nieuw Wachtwoord</label>
-              <input type="password" id="newPasswordInput" class="form-input" required autocomplete="new-password">
+              <label for="newPasswordInput" class="form-label">Nieuw Wachtwoord</label>
+              <input type="password" id="newPasswordInput" class="form-input" required placeholder="Nieuw wachtwoord" title="Nieuw wachtwoord">
             </div>
             <div class="form-group">
-              <label class="form-label">Bevestig Nieuw Wachtwoord</label>
-              <input type="password" id="confirmPasswordInput" class="form-input" required autocomplete="new-password">
+              <label for="confirmPasswordInput" class="form-label">Bevestig Nieuw Wachtwoord</label>
+              <input type="password" id="confirmPasswordInput" class="form-input" required placeholder="Bevestig wachtwoord" title="Bevestig nieuw wachtwoord">
             </div>
           </div>
-          <button type="submit" class="btn btn-primary">
-            🔑 Wachtwoord Wijzigen
-          </button>
+          <button type="submit" class="btn btn-primary">🔑 Wachtwoord Wijzigen</button>
         </form>
       </div>
     </div>
   </div>
 </div>
 
-<script src="js/app.js"></script>
+<script src="js/app.js" defer></script>
 </body>
 </html>
