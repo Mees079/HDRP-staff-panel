@@ -1,12 +1,8 @@
-// ======================
-// GLOBAL DATA
-// ======================
-let users = [];
-let currentUser = null;
+// ========================
+// script.js
+// ========================
 
-// ======================
-// STORAGE
-// ======================
+// Data opslaan en laden
 function saveData() {
   localStorage.setItem("users", JSON.stringify(users));
   localStorage.setItem("currentUser", currentUser ? JSON.stringify(currentUser) : null);
@@ -17,24 +13,31 @@ function loadData() {
   const storedUser = localStorage.getItem("currentUser");
 
   if(storedUsers) {
-    users = JSON.parse(storedUsers);
-  } else {
-    // Alleen als localStorage leeg is, initialiseren met default users
-    users = [
-      { email: "mees", password: "mees", role: "admin", lastActive: new Date().toISOString() },
-      { email: "demo", password: "demo", role: "viewer", lastActive: new Date().toISOString() }
-    ];
+    const parsedUsers = JSON.parse(storedUsers);
+    users.length = 0; // clear default array
+    parsedUsers.forEach(u => users.push(u));
   }
 
   if(storedUser) currentUser = JSON.parse(storedUser);
 }
 
-loadData(); // Dit moet **voordat DOMContentLoaded** is aangeroepen
-
-// ======================
-// DOM & FUNCTIONS
-// ======================
 document.addEventListener("DOMContentLoaded", function() {
+
+  // ========================
+  // Initial Data
+  // ========================
+  const users = [
+    { email: "mees", password: "mees", role: "admin", lastActive: new Date().toISOString() },
+    { email: "demo", password: "demo", role: "viewer", lastActive: new Date().toISOString() }
+  ];
+  let currentUser = null;
+
+  // Load saved data
+  loadData();
+
+  // ========================
+  // DOM Elements
+  // ========================
   const loginForm = document.getElementById("loginForm");
   const loginEmail = document.getElementById("loginEmail");
   const loginPassword = document.getElementById("loginPassword");
@@ -49,12 +52,10 @@ document.addEventListener("DOMContentLoaded", function() {
   const userCount = document.getElementById("userCount");
   const addUserForm = document.getElementById("addUserForm");
   const themeToggle = document.getElementById("themeToggle");
-  const passwordForm = document.getElementById("passwordForm");
-  const passwordMessage = document.getElementById("passwordMessage");
 
-  // ======================
-  // HELPERS
-  // ======================
+  // ========================
+  // Helper Functions
+  // ========================
   function showMessage(element, message, type="error") {
     element.textContent = message;
     element.className = "message " + type;
@@ -88,13 +89,14 @@ document.addEventListener("DOMContentLoaded", function() {
     userCount.textContent=`${users.length} gebruikers`;
   }
 
-  // ======================
-  // AUTHENTICATION
-  // ======================
+  // ========================
+  // Auth Functions
+  // ========================
   function login(email,password) {
     const user=users.find(u=>u.email===email && u.password===password);
     if(user){
       currentUser=user;
+      currentUser.lastActive = new Date().toISOString();
       saveData();
       loginScreen.classList.remove("active");
       dashboardScreen.classList.add("active");
@@ -133,48 +135,63 @@ document.addEventListener("DOMContentLoaded", function() {
   window.deleteUser=function(email){
     if(confirm("Weet je zeker dat je deze gebruiker wilt verwijderen?")){
       const idx=users.findIndex(u=>u.email===email);
-      if(idx!==-1) {
-        users.splice(idx,1);
-        saveData();
-      }
+      if(idx!==-1) users.splice(idx,1);
+      saveData();
       refreshUserTable();
     }
   }
 
-  function changePassword(current,newPass,confirmPass){
-    if(currentUser.password!==current) {
-      showMessage(passwordMessage,"Huidig wachtwoord is incorrect");
-      return;
-    }
-    if(newPass!==confirmPass) {
-      showMessage(passwordMessage,"Nieuwe wachtwoorden komen niet overeen");
+  function changePassword(currentPass,newPass){
+    if(currentPass!==currentUser.password){
+      showMessage(document.getElementById("passwordMessage"),"Huidig wachtwoord is incorrect");
       return;
     }
     if(newPass.length<3){
-      showMessage(passwordMessage,"Wachtwoord moet minimaal 3 karakters zijn");
+      showMessage(document.getElementById("passwordMessage"),"Wachtwoord moet minimaal 3 karakters zijn");
       return;
     }
-    currentUser.password=newPass;
-    const idx=users.findIndex(u=>u.email===currentUser.email);
+    currentUser.password = newPass;
+    const idx = users.findIndex(u=>u.email===currentUser.email);
     if(idx!==-1) users[idx].password=newPass;
     saveData();
-    showMessage(passwordMessage,"Wachtwoord gewijzigd","success");
-    passwordForm.reset();
+    showMessage(document.getElementById("passwordMessage"),"Wachtwoord gewijzigd","success");
+    document.getElementById("passwordForm").reset();
   }
 
-  // ======================
-  // EVENT LISTENERS
-  // ======================
-  loginForm.addEventListener("submit", function(e){ e.preventDefault(); login(loginEmail.value,loginPassword.value); });
-  logoutButton.addEventListener("click", function(e){ e.preventDefault(); logout(); });
-  document.querySelectorAll(".nav-tab").forEach(btn=>btn.addEventListener("click",()=>showTab(btn.getAttribute("data-tab"))));
-  addUserForm.addEventListener("submit", function(e){ e.preventDefault(); addUser(document.getElementById("addUserEmail").value,document.getElementById("addUserPassword").value,document.getElementById("addUserRole").value); });
-  themeToggle.addEventListener("click", function(){ document.body.classList.toggle("light-theme"); });
-  passwordForm.addEventListener("submit", function(e){ e.preventDefault(); changePassword(document.getElementById("currentPasswordInput").value,document.getElementById("newPasswordInput").value,document.getElementById("confirmPasswordInput").value); });
+  // ========================
+  // Event Listeners
+  // ========================
+  loginForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    login(loginEmail.value,loginPassword.value);
+  });
 
-  // ======================
-  // AUTO-LOGIN IF SESSION EXISTS
-  // ======================
+  logoutButton.addEventListener("click", function(e){ e.preventDefault(); logout(); });
+
+  document.querySelectorAll(".nav-tab").forEach(btn=>{
+    btn.addEventListener("click",()=>showTab(btn.getAttribute("data-tab")));
+  });
+
+  addUserForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    addUser(document.getElementById("addUserEmail").value,
+            document.getElementById("addUserPassword").value,
+            document.getElementById("addUserRole").value);
+  });
+
+  document.getElementById("passwordForm")?.addEventListener("submit", function(e){
+    e.preventDefault();
+    changePassword(document.getElementById("currentPasswordInput").value,
+                   document.getElementById("newPasswordInput").value);
+  });
+
+  themeToggle.addEventListener("click", function(){
+    document.body.classList.toggle("light-theme");
+  });
+
+  // ========================
+  // Check if already logged in
+  // ========================
   if(currentUser){
     loginScreen.classList.remove("active");
     dashboardScreen.classList.add("active");
@@ -182,4 +199,5 @@ document.addEventListener("DOMContentLoaded", function() {
     if(currentUser.role==="admin") usersTabBtn.classList.remove("hidden");
     showTab("dashboard");
   }
+
 });
