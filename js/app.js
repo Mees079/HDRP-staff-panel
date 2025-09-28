@@ -1,3 +1,4 @@
+// Global App State
 const App = {
   data: {
     users: [
@@ -7,166 +8,259 @@ const App = {
     currentUser: null,
     isDarkMode: true
   },
+
   storage: {
-    save() { localStorage.setItem('AppData', JSON.stringify(App.data)); },
+    save() {
+      console.log('Data opgeslagen in geheugen:', JSON.stringify(App.data, null, 2));
+    },
     load() {
-      const d = localStorage.getItem('AppData');
-      if (d) App.data = JSON.parse(d);
+      console.log('Data geladen uit geheugen');
     }
   },
+
   ui: {
-    showMessage(id, msg, type='error', time=4000) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.className = `message ${type}`;
-      el.textContent = msg;
-      el.style.display = 'block';
-      setTimeout(() => el.style.display = 'none', time);
+    showMessage(elementId, message, type = 'error', duration = 5000) {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+      element.className = `message ${type}`;
+      element.textContent = message;
+      element.style.display = 'block';
+      setTimeout(() => {
+        element.style.display = 'none';
+      }, duration);
     },
+
     showLogin() {
       document.getElementById('loginScreen').classList.add('active');
       document.getElementById('dashboardScreen').classList.remove('active');
+      document.getElementById('loginForm').reset();
     },
+
     showDashboard() {
       document.getElementById('loginScreen').classList.remove('active');
       document.getElementById('dashboardScreen').classList.add('active');
       App.ui.updateUserDisplay();
       App.ui.showTab('dashboard');
     },
-    showTab(tab) {
-      document.querySelectorAll('.main-content').forEach(e => e.classList.remove('active'));
-      document.getElementById(tab+'Tab').classList.add('active');
-      document.querySelectorAll('.nav-tab').forEach(e => e.classList.remove('active'));
-      const btn = document.querySelector(`[data-tab="${tab}"]`);
-      if (btn) btn.classList.add('active');
-      if (tab === 'users') App.ui.refreshUserTable();
+
+    showTab(tabName) {
+      document.querySelectorAll('.main-content').forEach(tab => tab.classList.remove('active'));
+      const targetTab = document.getElementById(tabName + 'Tab');
+      if (targetTab) targetTab.classList.add('active');
+      document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+      if (tabName === 'users') App.ui.refreshUserTable();
     },
+
     updateUserDisplay() {
-      const nameEl = document.getElementById('currentUserName');
-      const usersBtn = document.getElementById('usersTabBtn');
+      const userNameEl = document.getElementById('currentUserName');
+      const usersTabBtn = document.getElementById('usersTabBtn');
       if (App.data.currentUser) {
-        nameEl.textContent = App.data.currentUser.email;
-        if (App.data.currentUser.role === 'admin') usersBtn.classList.remove('hidden');
-        else usersBtn.classList.add('hidden');
+        userNameEl.textContent = App.data.currentUser.email;
+        if (App.data.currentUser.role === 'admin') usersTabBtn.classList.remove('hidden');
+        else usersTabBtn.classList.add('hidden');
       }
     },
+
     refreshUserTable() {
       const tbody = document.getElementById('userTableBody');
+      const countEl = document.getElementById('userCount');
+      if (!tbody || !countEl) return;
+
       tbody.innerHTML = '';
-      document.getElementById('userCount').textContent =
-        `${App.data.users.length} gebruiker${App.data.users.length !== 1 ? 's' : ''}`;
-      App.data.users.forEach((u,i) => {
-        const tr = document.createElement('tr');
-        const last = new Date(u.lastActive).toLocaleString('nl-NL');
-        const isMe = App.data.currentUser && App.data.currentUser.email === u.email;
-        tr.innerHTML = `
-          <td>${u.email}</td>
-          <td><span class="role-badge ${u.role}">${u.role}</span></td>
-          <td>${last}</td>
-          <td>${isMe ? '<em>Huidige gebruiker</em>' :
-            `<button class="btn btn-danger btn-small" data-i="${i}">Verwijder</button>`}</td>`;
-        tbody.appendChild(tr);
+      countEl.textContent = `${App.data.users.length} gebruiker${App.data.users.length !== 1 ? 's' : ''}`;
+
+      App.data.users.forEach((user, index) => {
+        const row = document.createElement('tr');
+        const lastActive = new Date(user.lastActive).toLocaleString('nl-NL');
+        const isCurrentUser = App.data.currentUser && App.data.currentUser.email === user.email;
+        row.innerHTML = `
+          <td>${user.email}</td>
+          <td><span class="role-badge ${user.role}">${user.role === 'admin' ? 'Administrator' : 'Kijker'}</span></td>
+          <td>${lastActive}</td>
+          <td>
+            <div class="user-actions">
+              ${!isCurrentUser ? `<button class="btn btn-danger btn-small delete-user-btn" data-user-index="${index}">Verwijder</button>` : '<em>Huidige gebruiker</em>'}
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
       });
-      tbody.querySelectorAll('button').forEach(b =>
-        b.addEventListener('click', () => App.auth.removeUser(+b.dataset.i))
-      );
+
+      document.querySelectorAll('.delete-user-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const userIndex = parseInt(this.getAttribute('data-user-index'));
+          App.auth.removeUser(userIndex);
+        });
+      });
     },
+
     toggleTheme() {
       App.data.isDarkMode = !App.data.isDarkMode;
-      if (App.data.isDarkMode) document.body.removeAttribute('data-theme');
-      else document.body.setAttribute('data-theme','light');
+      const toggle = document.getElementById('themeToggle');
+      if (App.data.isDarkMode) {
+        document.body.removeAttribute('data-theme');
+        toggle.classList.remove('active');
+      } else {
+        document.body.setAttribute('data-theme', 'light');
+        toggle.classList.add('active');
+      }
       App.storage.save();
+    },
+
+    toggleUserMenu() {
+      const dropdown = document.getElementById('userDropdown');
+      dropdown.classList.toggle('show');
     }
   },
+
   auth: {
-    login(email, pass) {
-      const u = App.data.users.find(x => x.email===email && x.password===pass);
-      if (!u) return App.ui.showMessage('loginMessage','Ongeldig email of wachtwoord');
-      u.lastActive = new Date().toISOString();
-      App.data.currentUser = {...u};
-      App.storage.save();
-      App.ui.showDashboard();
+    login(email, password) {
+      const user = App.data.users.find(u => u.email === email && u.password === password);
+      if (user) {
+        user.lastActive = new Date().toISOString();
+        App.data.currentUser = { ...user };
+        App.storage.save();
+        App.ui.showDashboard();
+        return true;
+      } else {
+        App.ui.showMessage('loginMessage', 'Ongeldig email adres of wachtwoord');
+        return false;
+      }
     },
+
     logout() {
       App.data.currentUser = null;
       App.storage.save();
       App.ui.showLogin();
+      document.getElementById('userDropdown').classList.remove('show');
     },
-    addUser(email, pass, role) {
-      if (!email || !pass) return App.ui.showMessage('addUserMessage','Alle velden zijn verplicht');
-      if (App.data.users.find(u=>u.email===email))
-        return App.ui.showMessage('addUserMessage','Gebruiker bestaat al');
-      App.data.users.push({ email, password: pass, role, lastActive: new Date().toISOString() });
+
+    addUser(email, password, role) {
+      if (!email || !password || !role) {
+        App.ui.showMessage('addUserMessage', 'Alle velden zijn verplicht');
+        return false;
+      }
+      if (App.data.users.find(u => u.email === email)) {
+        App.ui.showMessage('addUserMessage', 'Gebruiker met dit email bestaat al');
+        return false;
+      }
+      if (password.length < 3) {
+        App.ui.showMessage('addUserMessage', 'Wachtwoord moet minimaal 3 karakters lang zijn');
+        return false;
+      }
+      App.data.users.push({ email, password, role, lastActive: new Date().toISOString() });
       App.storage.save();
       App.ui.refreshUserTable();
-      App.ui.showMessage('addUserMessage','Gebruiker toegevoegd','success');
+      App.ui.showMessage('addUserMessage', `Gebruiker ${email} succesvol toegevoegd`, 'success');
+      document.getElementById('addUserForm').reset();
+      return true;
     },
-    removeUser(i) {
-      App.data.users.splice(i,1);
+
+    removeUser(index) {
+      if (index < 0 || index >= App.data.users.length) return;
+      const user = App.data.users[index];
+      App.data.users.splice(index, 1);
       App.storage.save();
       App.ui.refreshUserTable();
-      App.ui.showMessage('addUserMessage','Gebruiker verwijderd','success');
+      App.ui.showMessage('addUserMessage', `Gebruiker ${user.email} verwijderd`, 'success');
     },
-    changePassword(cur,newp,conf) {
-      if (cur!==App.data.currentUser.password)
-        return App.ui.showMessage('passwordMessage','Huidig wachtwoord is incorrect');
-      if (newp!==conf)
-        return App.ui.showMessage('passwordMessage','Nieuwe wachtwoorden komen niet overeen');
-      App.data.currentUser.password = newp;
-      const idx = App.data.users.findIndex(u=>u.email===App.data.currentUser.email);
-      if (idx>-1) App.data.users[idx].password = newp;
+
+    changePassword(currentPassword, newPassword, confirmPassword) {
+      if (!App.data.currentUser) return false;
+      if (currentPassword !== App.data.currentUser.password) {
+        App.ui.showMessage('passwordMessage', 'Huidig wachtwoord is incorrect');
+        return false;
+      }
+      if (newPassword !== confirmPassword) {
+        App.ui.showMessage('passwordMessage', 'Nieuwe wachtwoorden komen niet overeen');
+        return false;
+      }
+      if (newPassword.length < 3) {
+        App.ui.showMessage('passwordMessage', 'Wachtwoord moet minimaal 3 karakters lang zijn');
+        return false;
+      }
+      App.data.currentUser.password = newPassword;
+      const userIndex = App.data.users.findIndex(u => u.email === App.data.currentUser.email);
+      if (userIndex !== -1) App.data.users[userIndex].password = newPassword;
       App.storage.save();
-      App.ui.showMessage('passwordMessage','Wachtwoord gewijzigd','success');
+      App.ui.showMessage('passwordMessage', 'Wachtwoord succesvol gewijzigd', 'success');
+      document.getElementById('passwordForm').reset();
+      return true;
     }
   },
+
   init() {
     App.storage.load();
-    if (!App.data.isDarkMode) document.body.setAttribute('data-theme','light');
 
-    document.getElementById('loginForm').addEventListener('submit',e=>{
-      e.preventDefault();
-      App.auth.login(
-        document.getElementById('loginEmail').value.trim(),
-        document.getElementById('loginPassword').value
-      );
+    if (!App.data.isDarkMode) {
+      document.body.setAttribute('data-theme', 'light');
+      document.getElementById('themeToggle').classList.add('active');
+    }
+
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        App.auth.login(email, password);
+      });
+    }
+
+    const addUserForm = document.getElementById('addUserForm');
+    if (addUserForm) {
+      addUserForm.querySelector('button[type="submit"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        const email = document.getElementById('addUserEmail').value.trim();
+        const password = document.getElementById('addUserPassword').value;
+        const role = document.getElementById('addUserRole').value;
+        App.auth.addUser(email, password, role);
+      });
+    }
+
+    const passwordForm = document.getElementById('passwordForm');
+    if (passwordForm) {
+      passwordForm.querySelector('button[type="submit"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        const current = document.getElementById('currentPasswordInput').value;
+        const newPass = document.getElementById('newPasswordInput').value;
+        const confirm = document.getElementById('confirmPasswordInput').value;
+        App.auth.changePassword(current, newPass, confirm);
+      });
+    }
+
+    document.querySelectorAll('.nav-tab').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const tab = this.getAttribute('data-tab');
+        App.ui.showTab(tab);
+      });
     });
 
-    document.querySelectorAll('.nav-tab').forEach(btn=>
-      btn.addEventListener('click',()=>App.ui.showTab(btn.dataset.tab))
-    );
-
-    document.getElementById('addUserForm').addEventListener('submit',e=>{
-      e.preventDefault();
-      App.auth.addUser(
-        document.getElementById('addUserEmail').value.trim(),
-        document.getElementById('addUserPassword').value,
-        document.getElementById('addUserRole').value
-      );
-      e.target.reset();
-    });
-
-    document.getElementById('passwordForm').addEventListener('submit',e=>{
-      e.preventDefault();
-      App.auth.changePassword(
-        document.getElementById('currentPasswordInput').value,
-        document.getElementById('newPasswordInput').value,
-        document.getElementById('confirmPasswordInput').value
-      );
-      e.target.reset();
-    });
-
-    document.getElementById('logoutButton').addEventListener('click',App.auth.logout);
-    document.getElementById('themeToggle').addEventListener('click',App.ui.toggleTheme);
-
-    document.getElementById('userMenuButton').addEventListener('click',e=>{
+    document.getElementById('userMenuButton').addEventListener('click', function(e) {
       e.stopPropagation();
-      document.getElementById('userDropdown').classList.toggle('show');
+      App.ui.toggleUserMenu();
     });
-    document.addEventListener('click',()=>document.getElementById('userDropdown').classList.remove('show'));
 
-    if (App.data.currentUser) App.ui.showDashboard();
-    else App.ui.showLogin();
+    document.getElementById('logoutButton').addEventListener('click', function(e) {
+      e.preventDefault();
+      App.auth.logout();
+    });
+
+    document.getElementById('themeToggle').addEventListener('click', function() {
+      App.ui.toggleTheme();
+    });
+
+    window.addEventListener('click', function() {
+      document.getElementById('userDropdown').classList.remove('show');
+    });
+
+    App.ui.showLogin();
   }
 };
 
-document.addEventListener('DOMContentLoaded', App.init);
+// Start App
+document.addEventListener('DOMContentLoaded', function() {
+  App.init();
+});
