@@ -1,13 +1,12 @@
 const App = {
     data: {
         users: [],
-        currentUser: null,
-        isDarkMode: true
+        currentUser: null
     },
     storage: {
-        save() { localStorage.setItem('AppData', JSON.stringify(App.data)); },
+        save() { localStorage.setItem('HDRP_Data', JSON.stringify(App.data)); },
         load() {
-            const s = localStorage.getItem('AppData');
+            const s = localStorage.getItem('HDRP_Data');
             if (s) App.data = JSON.parse(s);
         }
     },
@@ -34,7 +33,6 @@ const App = {
         refreshUsers() {
             const tbody = document.getElementById('userTableBody');
             const count = document.getElementById('userCount');
-            const label = document.getElementById('userCountLabel');
             tbody.innerHTML = '';
             App.data.users.forEach((u,i)=>{
                 const tr = document.createElement('tr');
@@ -44,14 +42,33 @@ const App = {
                     <td>${new Date(u.lastActive).toLocaleString('nl-NL')}</td>
                     <td>${App.data.currentUser?.email===u.email
                         ? '<em>Huidige gebruiker</em>'
-                        : `<button class="btn btn-small btn-danger" data-i="${i}">Verwijder</button>`}</td>`;
+                        : (App.data.currentUser.role==='eigenaar'
+                            ? `<button class="btn btn-small btn-danger" data-i="${i}">Verwijder</button>`
+                            : '')}</td>`;
                 tbody.appendChild(tr);
             });
             count.textContent = App.data.users.length;
-            label.textContent = `${App.data.users.length} gebruiker${App.data.users.length!==1?'s':''}`;
             tbody.querySelectorAll('button').forEach(b=>{
                 b.addEventListener('click',()=>App.auth.removeUser(parseInt(b.dataset.i)));
             });
+        },
+        updateRoleOptions(){
+            const sel = document.getElementById('addUserRole');
+            if (App.data.currentUser?.role === "eigenaar" &&
+                !sel.querySelector('option[value="eigenaar"]')) {
+                const opt = document.createElement('option');
+                opt.value = 'eigenaar';
+                opt.textContent = 'Eigenaar';
+                sel.appendChild(opt);
+            }
+        },
+        updateTabs(){
+            const btn = document.getElementById('usersTabBtn');
+            if (["eigenaar","staffco"].includes(App.data.currentUser?.role)){
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
         }
     },
     auth: {
@@ -62,6 +79,9 @@ const App = {
             App.data.currentUser = {...u};
             App.storage.save();
             App.ui.showScreen(false);
+            document.getElementById('currentUserName').textContent = u.email;
+            App.ui.updateRoleOptions();
+            App.ui.updateTabs();
             App.ui.refreshUsers();
         },
         logout(){
@@ -70,14 +90,25 @@ const App = {
             App.ui.showScreen(true);
         },
         addUser(email,pw,role){
-            if(App.data.users.find(u=>u.email===email))
+            const u = App.data.currentUser;
+            if (u.role !== "eigenaar")
+                return App.ui.showMessage('addUserMessage','Alleen de eigenaar kan accounts aanmaken');
+            if(App.data.users.find(x=>x.email===email))
                 return App.ui.showMessage('addUserMessage','Gebruiker bestaat al');
-            App.data.users.push({email,password:pw,role,lastActive:new Date().toISOString()});
+            if (role === "eigenaar" && u.role !== "eigenaar")
+                return App.ui.showMessage('addUserMessage','Alleen de eigenaar kan deze rol geven');
+            App.data.users.push({
+                email, password: pw, role,
+                lastActive: new Date().toISOString()
+            });
             App.storage.save();
             App.ui.refreshUsers();
             App.ui.showMessage('addUserMessage','Gebruiker toegevoegd','success');
         },
         removeUser(i){
+            const u = App.data.currentUser;
+            if (u.role !== "eigenaar")
+                return App.ui.showMessage('addUserMessage','Alleen de eigenaar kan verwijderen');
             App.data.users.splice(i,1);
             App.storage.save();
             App.ui.refreshUsers();
@@ -97,8 +128,27 @@ const App = {
     },
     init(){
         App.storage.load();
-        if(App.data.currentUser) App.ui.showScreen(false);
-        else App.ui.showScreen(true);
+
+        // --- vaste eigenaar initialiseren ---
+        if (!App.data.users.find(u=>u.role==="eigenaar")) {
+            App.data.users.push({
+                email: "meespost24@gmail.com",
+                password: "HDRP_02025",
+                role: "eigenaar",
+                lastActive: new Date().toISOString()
+            });
+            App.storage.save();
+        }
+
+        if(App.data.currentUser) {
+            App.ui.showScreen(false);
+            document.getElementById('currentUserName').textContent = App.data.currentUser.email;
+            App.ui.updateRoleOptions();
+            App.ui.updateTabs();
+            App.ui.refreshUsers();
+        } else {
+            App.ui.showScreen(true);
+        }
 
         document.getElementById('loginForm').addEventListener('submit',e=>{
             e.preventDefault();

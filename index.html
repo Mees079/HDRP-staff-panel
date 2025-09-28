@@ -1,162 +1,105 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Panel Hoofddorp Roleplay</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Panel Hoofddorp Roleplay</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- Login Screen -->
+<!-- LOGIN -->
 <div id="loginScreen" class="screen active">
-    <div class="login-container">
-        <div class="login-box">
-            <div class="login-header">
-                <h1>HDRP Staff Panel</h1>
-                <p>Account aanvragen via Discord of mail naar Hoofddorproleplay@outlook.com.</p>
-            </div>
-            <div id="loginMessage" class="message"></div>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail" class="form-label">E-mailadres</label>
-                    <input type="email" id="loginEmail" class="form-input" placeholder="E-mail" required autocomplete="username">
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword" class="form-label">Wachtwoord</label>
-                    <input type="password" id="loginPassword" class="form-input" placeholder="Wachtwoord" required autocomplete="current-password">
-                </div>
-                <button type="submit" class="btn btn-primary btn-full">Inloggen</button>
-            </form>
-        </div>
-    </div>
+  <div class="login-container">
+    <h1>HDRP Staff Panel</h1>
+    <form id="loginForm">
+      <label for="loginEmail">E-mail</label>
+      <input type="email" id="loginEmail" placeholder="E-mail" required autocomplete="username">
+
+      <label for="loginPassword">Wachtwoord</label>
+      <input type="password" id="loginPassword" placeholder="Wachtwoord" required autocomplete="current-password">
+
+      <button type="submit" class="btn btn-primary">Inloggen</button>
+      <div id="loginMessage" class="message"></div>
+    </form>
+  </div>
 </div>
 
-<!-- Dashboard Screen -->
+<!-- DASHBOARD -->
 <div id="dashboardScreen" class="screen">
-    <div class="topbar">
-        <div class="topbar-brand">Staff Panel Hoofddorp Roleplay</div>
-        <div class="nav-tabs">
-            <button class="nav-tab active" data-tab="dashboard">📊 Algemeen</button>
-            <button class="nav-tab hidden" id="usersTabBtn" data-tab="users">👥 Staff Team Beheren</button>
-            <button class="nav-tab" data-tab="settings">⚙️ Instellingen</button>
-        </div>
-        <div class="topbar-actions">
-            <div class="user-menu">
-                <button class="user-button" id="userMenuButton">
-                    <span id="currentUserName">gebruiker</span>
-                    <span>▼</span>
-                </button>
-                <div id="userDropdown" class="user-dropdown">
-                    <a href="#" class="dropdown-item danger" id="logoutButton">🚪 Uitloggen</a>
-                </div>
-            </div>
-        </div>
+  <header class="topbar">
+    <div class="topbar-brand">Staff Panel Hoofddorp Roleplay</div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="dashboard">📊 Algemeen</button>
+      <button class="nav-tab hidden" id="usersTabBtn" data-tab="users">👥 Staff Team Beheren</button>
+      <button class="nav-tab" data-tab="settings">⚙️ Instellingen</button>
+    </nav>
+    <div class="user-info">
+      <span id="currentUserName"></span>
+      <button id="logoutButton" class="btn btn-small">Uitloggen</button>
     </div>
+  </header>
 
-    <!-- Algemeen Tab -->
-    <div id="dashboardTab" class="main-content active">
-        <div class="container">
-            <div class="page-header">
-                <h1>Algemeen</h1>
-                <p>Overzicht van het staff panel</p>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-number" id="userCount">0</div>
-                    <div class="stat-label">Staff Leden</div>
-                </div>
-            </div>
+  <!-- Algemeen -->
+  <main>
+    <section id="dashboardTab" class="main-content active">
+      <h1>Algemeen</h1>
+      <p>Panel statistieken</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="userCount">0</div>
+          <div class="stat-label">Staff Leden</div>
         </div>
-    </div>
+      </div>
+    </section>
 
-    <!-- Staff Team Beheren Tab -->
-    <div id="usersTab" class="main-content">
-        <div class="container">
-            <div class="page-header">
-                <h1>Staff Team Beheren</h1>
-                <p>Beheer toegang en permissies van staffleden</p>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Nieuwe gebruiker toevoegen</h2>
-                </div>
-                <div id="addUserMessage" class="message"></div>
-                <form id="addUserForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="addUserEmail" class="form-label">E-mail</label>
-                            <input type="email" id="addUserEmail" class="form-input" placeholder="E-mail" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="addUserRole" class="form-label">Rol</label>
-                            <select id="addUserRole" class="form-select" required title="Rol">
-                                <option value="">Selecteer rol</option>
-                                <option value="viewer">Kijker</option>
-                                <option value="admin">Administrator</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="addUserPassword" class="form-label">Tijdelijk wachtwoord</label>
-                        <input type="password" id="addUserPassword" class="form-input" placeholder="Wachtwoord" required>
-                    </div>
-                    <button type="submit" class="btn btn-success">➕ Gebruiker toevoegen</button>
-                </form>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Bestaande gebruikers</h2>
-                    <span id="userCountLabel">0 gebruikers</span>
-                </div>
-                <table class="user-table">
-                    <thead>
-                        <tr>
-                            <th>E-mail</th>
-                            <th>Rol</th>
-                            <th>Laatst actief</th>
-                            <th>Actie</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <!-- Staff Team Beheren -->
+    <section id="usersTab" class="main-content">
+      <h1>Staff Team Beheren</h1>
+      <form id="addUserForm" class="form-grid">
+        <label for="addUserEmail">E-mail</label>
+        <input type="email" id="addUserEmail" placeholder="E-mail" required>
 
-    <!-- Instellingen Tab -->
-    <div id="settingsTab" class="main-content">
-        <div class="container">
-            <div class="page-header">
-                <h1>Instellingen</h1>
-                <p>Personalisatie en account instellingen</p>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Account</h2>
-                </div>
-                <div id="passwordMessage" class="message"></div>
-                <form id="passwordForm">
-                    <div class="form-group">
-                        <label for="currentPasswordInput" class="form-label">Huidig wachtwoord</label>
-                        <input type="password" id="currentPasswordInput" class="form-input" placeholder="Huidig wachtwoord" required autocomplete="current-password">
-                    </div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="newPasswordInput" class="form-label">Nieuw wachtwoord</label>
-                            <input type="password" id="newPasswordInput" class="form-input" placeholder="Nieuw wachtwoord" required autocomplete="new-password">
-                        </div>
-                        <div class="form-group">
-                            <label for="confirmPasswordInput" class="form-label">Bevestig nieuw wachtwoord</label>
-                            <input type="password" id="confirmPasswordInput" class="form-input" placeholder="Bevestig nieuw wachtwoord" required autocomplete="new-password">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">🔑 Wachtwoord wijzigen</button>
-                </form>
-            </div>
-        </div>
-    </div>
+        <label for="addUserRole">Rol</label>
+        <select id="addUserRole" required>
+          <option value="">Selecteer rol</option>
+          <option value="staff">Staff</option>
+          <option value="staffco">Staff Coördinatie</option>
+          <!-- Optie eigenaar wordt via JS toegevoegd als de ingelogde user eigenaar is -->
+        </select>
+
+        <label for="addUserPassword">Wachtwoord</label>
+        <input type="password" id="addUserPassword" placeholder="Wachtwoord" required>
+
+        <button type="submit" class="btn btn-primary">Toevoegen</button>
+      </form>
+      <div id="addUserMessage" class="message"></div>
+      <table class="user-table">
+        <thead>
+          <tr><th>Email</th><th>Rol</th><th>Laatst actief</th><th>Actie</th></tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
+    </section>
+
+    <!-- Instellingen -->
+    <section id="settingsTab" class="main-content">
+      <h1>Instellingen</h1>
+      <form id="passwordForm" class="form-grid">
+        <label for="currentPasswordInput">Huidig wachtwoord</label>
+        <input type="password" id="currentPasswordInput" placeholder="Huidig wachtwoord" required autocomplete="current-password">
+
+        <label for="newPasswordInput">Nieuw wachtwoord</label>
+        <input type="password" id="newPasswordInput" placeholder="Nieuw wachtwoord" required autocomplete="new-password">
+
+        <label for="confirmPasswordInput">Bevestig nieuw wachtwoord</label>
+        <input type="password" id="confirmPasswordInput" placeholder="Bevestig nieuw wachtwoord" required autocomplete="new-password">
+
+        <button type="submit" class="btn btn-primary">Wijzigen</button>
+      </form>
+      <div id="passwordMessage" class="message"></div>
+    </section>
+  </main>
 </div>
 
 <script src="js/app.js"></script>
