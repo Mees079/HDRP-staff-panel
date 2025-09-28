@@ -3,27 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Monitoring System</title>
+    <title>HDRP Staff Panel</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        /* Voorkom flash of content */
-        .screen { display: none; }
-    </style>
 </head>
 <body>
-
 <!-- Login Screen -->
 <div id="loginScreen" class="screen">
     <div class="login-container">
         <div class="login-box">
             <div class="login-header">
-                <h1>HDRP staff panel</h1>
-                <p>Account aanvragen kan via discord of mailen naar Hoofddorproleplay@outlook.com.</p>
+                <h1>HDRP Staff Panel</h1>
+                <p>Log in met je staff-account</p>
             </div>
             <div id="loginMessage" class="message"></div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label class="form-label">Email Adres</label>
+                    <label class="form-label">Email</label>
                     <input type="text" id="loginEmail" class="form-input" required autocomplete="username">
                 </div>
                 <div class="form-group">
@@ -38,19 +33,19 @@
 
 <!-- Main Dashboard -->
 <div id="dashboardScreen" class="screen">
-    <!-- Topbar -->
     <div class="topbar">
-        <div class="topbar-brand">Security Monitoring System</div>
+        <div class="topbar-brand">HDRP Staff Panel</div>
         <div class="nav-tabs">
-            <button class="nav-tab active" data-tab="dashboard">📊 Dashboard</button>
-            <button class="nav-tab hidden" id="usersTabBtn" data-tab="users">👥 Gebruikers</button>
+            <button class="nav-tab active" data-tab="staffTeam">👥 Staff Team</button>
+            <button class="nav-tab" data-tab="livePlayers">🎮 Live Spelers</button>
+            <button class="nav-tab" data-tab="antiCheat">🛡 Anti-Cheat</button>
+            <button class="nav-tab" data-tab="logs">📄 Logs</button>
             <button class="nav-tab" data-tab="settings">⚙️ Instellingen</button>
         </div>
         <div class="topbar-actions">
             <div class="user-menu">
                 <button class="user-button" id="userMenuButton">
-                    <span id="currentUserName">gebruiker</span>
-                    <span>▼</span>
+                    <span id="currentUserName">gebruiker</span> ▼
                 </button>
                 <div id="userDropdown" class="user-dropdown">
                     <a href="#" class="dropdown-item danger" id="logoutButton">🚪 Uitloggen</a>
@@ -59,95 +54,51 @@
         </div>
     </div>
 
-    <!-- Dashboard Tab -->
-    <div id="dashboardTab" class="main-content active">
+    <!-- Staff Team Tab -->
+    <div id="staffTeamTab" class="main-content active">
         <div class="container">
             <div class="page-header">
-                <h1>Security Dashboard</h1>
-                <p>Real-time monitoring van verdachte activiteiten</p>
+                <h1>Staff Team</h1>
+                <p>Klik op een gebruiker voor meer info</p>
             </div>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">🚨</div>
-                    <div class="stat-number" id="criticalIncidents">3</div>
-                    <div class="stat-label">Critical Incidents</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">⚡</div>
-                    <div class="stat-number" id="suspiciousActivity">7</div>
-                    <div class="stat-label">Suspicious Activity</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📊</div>
-                    <div class="stat-number" id="financialAnomalies">2</div>
-                    <div class="stat-label">Financial Anomalies</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🔒</div>
-                    <div class="stat-number" id="highRiskEntries">1</div>
-                    <div class="stat-label">High-Risk Entries</div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Recent Security Events</h2>
-                </div>
-                <p>Hier komen de real-time security logs...</p>
+            <div id="staffGrid" class="staff-grid"></div>
+            <div id="staffInfo" class="card hidden">
+                <h2 id="staffInfoName"></h2>
+                <p id="staffInfoDetails"></p>
             </div>
         </div>
     </div>
 
-    <!-- Users Tab -->
-    <div id="usersTab" class="main-content">
+    <!-- Live Players Tab -->
+    <div id="livePlayersTab" class="main-content">
         <div class="container">
             <div class="page-header">
-                <h1>Gebruikersbeheer</h1>
-                <p>Beheer toegang en permissies van gebruikers</p>
+                <h1>Live Spelers</h1>
+                <p>Alle spelers die ingame zijn (Roblox)</p>
             </div>
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Nieuwe Gebruiker Toevoegen</h2>
-                </div>
-                <div id="addUserMessage" class="message"></div>
-                <form id="addUserForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">Email/Gebruikersnaam</label>
-                            <input type="text" id="addUserEmail" class="form-input" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Rol</label>
-                            <select id="addUserRole" class="form-select" required>
-                                <option value="">Selecteer rol</option>
-                                <option value="viewer">Kijker</option>
-                                <option value="admin">Administrator</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Tijdelijk Wachtwoord</label>
-                        <input type="password" id="addUserPassword" class="form-input" required>
-                    </div>
-                    <button type="submit" class="btn btn-success">👤 Gebruiker Toevoegen</button>
-                </form>
+            <div id="livePlayersList" class="card">Lijst wordt later geladen...</div>
+        </div>
+    </div>
+
+    <!-- Anti-Cheat Tab -->
+    <div id="antiCheatTab" class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1>Anti-Cheat</h1>
+                <p>Monitoring van cheat-detectie</p>
             </div>
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Bestaande Gebruikers</h2>
-                    <span id="userCount">0 gebruikers</span>
-                </div>
-                <table class="user-table">
-                    <thead>
-                        <tr>
-                            <th>Email/Gebruiker</th>
-                            <th>Rol</th>
-                            <th>Laatst Actief</th>
-                            <th>Acties</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody"></tbody>
-                </table>
+            <div id="antiCheatContent" class="card">Live integratie volgt...</div>
+        </div>
+    </div>
+
+    <!-- Logs Tab -->
+    <div id="logsTab" class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1>Logs</h1>
+                <p>Realtime loggegevens</p>
             </div>
+            <div id="logsContent" class="card">Live integratie volgt...</div>
         </div>
     </div>
 
@@ -156,12 +107,8 @@
         <div class="container">
             <div class="page-header">
                 <h1>Instellingen</h1>
-                <p>Personalisatie en account instellingen</p>
             </div>
             <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Weergave</h2>
-                </div>
                 <div class="setting-item">
                     <div class="setting-info">
                         <h4>Dark Mode</h4>
@@ -171,9 +118,6 @@
                 </div>
             </div>
             <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Account</h2>
-                </div>
                 <div id="passwordMessage" class="message"></div>
                 <form id="passwordForm">
                     <div class="form-group">
