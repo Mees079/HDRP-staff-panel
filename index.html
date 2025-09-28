@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <!-- Login Screen -->
 <div id="loginScreen" class="screen active">
   <div class="login-container">
@@ -26,14 +25,17 @@
           <label class="form-label">Wachtwoord</label>
           <input type="password" id="loginPassword" class="form-input" required autocomplete="current-password">
         </div>
-        <button type="submit" class="btn btn-primary btn-full">Inloggen</button>
+        <button type="submit" class="btn btn-primary btn-full">
+          Inloggen
+        </button>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Dashboard Screen -->
+<!-- Main Dashboard -->
 <div id="dashboardScreen" class="screen">
+  <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-brand">Security Monitoring System</div>
     <div class="nav-tabs">
@@ -44,7 +46,8 @@
     <div class="topbar-actions">
       <div class="user-menu">
         <button class="user-button" id="userMenuButton">
-          <span id="currentUserName">gebruiker</span> ▼
+          <span id="currentUserName">gebruiker</span>
+          <span>▼</span>
         </button>
         <div id="userDropdown" class="user-dropdown">
           <a href="#" class="dropdown-item danger" id="logoutButton">🚪 Uitloggen</a>
@@ -53,6 +56,7 @@
     </div>
   </div>
 
+  <!-- Dashboard Tab -->
   <div id="dashboardTab" class="main-content active">
     <div class="container">
       <div class="page-header">
@@ -90,7 +94,7 @@
     </div>
   </div>
 
-  <!-- Users Tab -->
+  <!-- User Management Tab -->
   <div id="usersTab" class="main-content">
     <div class="container">
       <div class="page-header">
@@ -121,7 +125,9 @@
             <label class="form-label">Tijdelijk Wachtwoord</label>
             <input type="password" id="addUserPassword" class="form-input" required>
           </div>
-          <button type="submit" class="btn btn-success">👤 Gebruiker Toevoegen</button>
+          <button type="submit" class="btn btn-success">
+            👤 Gebruiker Toevoegen
+          </button>
         </form>
       </div>
       <div class="card">
@@ -138,7 +144,8 @@
               <th>Acties</th>
             </tr>
           </thead>
-          <tbody id="userTableBody"></tbody>
+          <tbody id="userTableBody">
+          </tbody>
         </table>
       </div>
     </div>
@@ -183,7 +190,9 @@
               <input type="password" id="confirmPasswordInput" class="form-input" required autocomplete="new-password">
             </div>
           </div>
-          <button type="submit" class="btn btn-primary">🔑 Wachtwoord Wijzigen</button>
+          <button type="submit" class="btn btn-primary">
+            🔑 Wachtwoord Wijzigen
+          </button>
         </form>
       </div>
     </div>
