@@ -1,27 +1,34 @@
+const BIN_ID = "68d9759343b1c97be9534096"; // Vul je bin ID in
+const BIN_SECRET = "$2a$10$DTiU3hcuglHpTy/sU3hUKuHWnX7exTTkb6/eahL2zr9cyIwo9feTK"; // Vul je secret key in
+
 const App = {
     data: {
-        users: [
-            { email: 'mees', password: 'mees', role: 'admin', lastActive: new Date().toISOString() },
-            { email: 'demo', password: 'demo', role: 'viewer', lastActive: new Date().toISOString() }
-        ],
+        users: [],
         currentUser: null,
         isDarkMode: true
     },
     storage: {
-        save() {
+        async load() {
             try {
-                localStorage.setItem('AppData', JSON.stringify(App.data));
-            } catch (e) {
-                console.error('Opslaan mislukt:', e);
-            }
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { "X-Master-Key": BIN_SECRET }
+                });
+                const json = await res.json();
+                if (json && json.record) App.data = json.record;
+            } catch (e) { console.error("Laden mislukt:", e); }
         },
-        load() {
+        async save() {
             try {
-                const storedData = localStorage.getItem('AppData');
-                if (storedData) App.data = JSON.parse(storedData);
-            } catch (e) {
-                console.error('Laden mislukt:', e);
-            }
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Master-Key": BIN_SECRET,
+                        "X-Bin-Versioning": "false"
+                    },
+                    body: JSON.stringify(App.data)
+                });
+            } catch (e) { console.error("Opslaan mislukt:", e); }
         }
     },
     ui: {
@@ -178,8 +185,8 @@ const App = {
             return true;
         }
     },
-    init() {
-        App.storage.load();
+    async init() {
+        await App.storage.load();
 
         if (!App.data.isDarkMode) {
             document.body.setAttribute('data-theme', 'light');
