@@ -1,34 +1,38 @@
+// ======================
+// GLOBAL DATA
+// ======================
+let users = [];
+let currentUser = null;
+
+// ======================
+// STORAGE
+// ======================
+function saveData() {
+  localStorage.setItem("users", JSON.stringify(users));
+  localStorage.setItem("currentUser", currentUser ? JSON.stringify(currentUser) : null);
+}
+
+function loadData() {
+  const storedUsers = localStorage.getItem("users");
+  const storedUser = localStorage.getItem("currentUser");
+
+  if (storedUsers) users = JSON.parse(storedUsers);
+  else {
+    users = [
+      { email: "mees", password: "mees", role: "admin", lastActive: new Date().toISOString() },
+      { email: "demo", password: "demo", role: "viewer", lastActive: new Date().toISOString() }
+    ];
+  }
+
+  if (storedUser) currentUser = JSON.parse(storedUser);
+}
+
+loadData();
+
+// ======================
+// ELEMENTS
+// ======================
 document.addEventListener("DOMContentLoaded", function() {
-  // ======================
-  // DATA & STORAGE
-  // ======================
-  let users = [
-    { email: "mees", password: "mees", role: "admin", lastActive: new Date().toISOString() },
-    { email: "demo", password: "demo", role: "viewer", lastActive: new Date().toISOString() }
-  ];
-  let currentUser = null;
-
-  function saveData() {
-    localStorage.setItem("users", JSON.stringify(users));
-    localStorage.setItem("currentUser", currentUser ? JSON.stringify(currentUser) : null);
-  }
-
-  function loadData() {
-    const storedUsers = localStorage.getItem("users");
-    const storedUser = localStorage.getItem("currentUser");
-
-    if(storedUsers) {
-      users = JSON.parse(storedUsers);
-    }
-
-    if(storedUser) currentUser = JSON.parse(storedUser);
-  }
-
-  loadData(); // laad data bij start
-
-  // ======================
-  // ELEMENTS
-  // ======================
   const loginForm = document.getElementById("loginForm");
   const loginEmail = document.getElementById("loginEmail");
   const loginPassword = document.getElementById("loginPassword");
@@ -43,6 +47,8 @@ document.addEventListener("DOMContentLoaded", function() {
   const userCount = document.getElementById("userCount");
   const addUserForm = document.getElementById("addUserForm");
   const themeToggle = document.getElementById("themeToggle");
+  const passwordForm = document.getElementById("passwordForm");
+  const passwordMessage = document.getElementById("passwordMessage");
 
   // ======================
   // HELPERS
@@ -87,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const user=users.find(u=>u.email===email && u.password===password);
     if(user){
       currentUser=user;
-      saveData(); // opslaan van sessie
+      saveData();
       loginScreen.classList.remove("active");
       dashboardScreen.classList.add("active");
       currentUserName.textContent=currentUser.email;
@@ -100,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function logout() {
     currentUser=null;
-    saveData(); // update sessie
+    saveData();
     loginScreen.classList.add("active");
     dashboardScreen.classList.remove("active");
     loginForm.reset();
@@ -116,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function() {
       return;
     }
     users.push({email,password,role,lastActive:new Date().toISOString()});
-    saveData(); // opslaan nieuwe gebruiker
+    saveData();
     showMessage(document.getElementById("addUserMessage"),"Gebruiker toegevoegd","success");
     addUserForm.reset();
     refreshUserTable();
@@ -127,36 +133,42 @@ document.addEventListener("DOMContentLoaded", function() {
       const idx=users.findIndex(u=>u.email===email);
       if(idx!==-1) {
         users.splice(idx,1);
-        saveData(); // opslaan na verwijderen
+        saveData();
       }
       refreshUserTable();
     }
   }
 
+  function changePassword(current,newPass,confirmPass){
+    if(currentUser.password!==current) {
+      showMessage(passwordMessage,"Huidig wachtwoord is incorrect");
+      return;
+    }
+    if(newPass!==confirmPass) {
+      showMessage(passwordMessage,"Nieuwe wachtwoorden komen niet overeen");
+      return;
+    }
+    if(newPass.length<3){
+      showMessage(passwordMessage,"Wachtwoord moet minimaal 3 karakters zijn");
+      return;
+    }
+    currentUser.password=newPass;
+    const idx=users.findIndex(u=>u.email===currentUser.email);
+    if(idx!==-1) users[idx].password=newPass;
+    saveData();
+    showMessage(passwordMessage,"Wachtwoord gewijzigd","success");
+    passwordForm.reset();
+  }
+
   // ======================
   // EVENT LISTENERS
   // ======================
-  loginForm.addEventListener("submit", function(e){
-    e.preventDefault();
-    login(loginEmail.value,loginPassword.value);
-  });
-
+  loginForm.addEventListener("submit", function(e){ e.preventDefault(); login(loginEmail.value,loginPassword.value); });
   logoutButton.addEventListener("click", function(e){ e.preventDefault(); logout(); });
-
-  document.querySelectorAll(".nav-tab").forEach(btn=>{
-    btn.addEventListener("click",()=>showTab(btn.getAttribute("data-tab")));
-  });
-
-  addUserForm.addEventListener("submit", function(e){
-    e.preventDefault();
-    addUser(document.getElementById("addUserEmail").value,
-            document.getElementById("addUserPassword").value,
-            document.getElementById("addUserRole").value);
-  });
-
-  themeToggle.addEventListener("click", function(){
-    document.body.classList.toggle("light-theme");
-  });
+  document.querySelectorAll(".nav-tab").forEach(btn=>btn.addEventListener("click",()=>showTab(btn.getAttribute("data-tab"))));
+  addUserForm.addEventListener("submit", function(e){ e.preventDefault(); addUser(document.getElementById("addUserEmail").value,document.getElementById("addUserPassword").value,document.getElementById("addUserRole").value); });
+  themeToggle.addEventListener("click", function(){ document.body.classList.toggle("light-theme"); });
+  passwordForm.addEventListener("submit", function(e){ e.preventDefault(); changePassword(document.getElementById("currentPasswordInput").value,document.getElementById("newPasswordInput").value,document.getElementById("confirmPasswordInput").value); });
 
   // ======================
   // AUTO-LOGIN IF SESSION EXISTS
