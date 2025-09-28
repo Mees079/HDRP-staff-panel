@@ -1,114 +1,167 @@
 const App = {
     data: {
-        staff: [
-            { email:'mees', password:'mees', role:'admin', lastActive:new Date().toISOString() },
-            { email:'demo', password:'demo', role:'viewer', lastActive:new Date().toISOString() }
+        users: [
+            { email: 'mees', password: 'mees', role: 'admin', lastActive: new Date().toISOString() },
+            { email: 'demo', password: 'demo', role: 'viewer', lastActive: new Date().toISOString() }
         ],
-        currentUser:null,
-        isDarkMode:true
+        currentUser: null,
+        isDarkMode: true
     },
-    storage:{
-        save(){ try{ localStorage.setItem('StaffPanelData',JSON.stringify(App.data)); } catch(e){ console.error('Opslaan mislukt:',e); } },
-        load(){ try{ const s = localStorage.getItem('StaffPanelData'); if(s) App.data = JSON.parse(s); } catch(e){ console.error('Laden mislukt:',e); } }
-    },
-    ui:{
-        showMessage(id,msg,type='error',duration=5000){
-            const el = document.getElementById(id); if(!el) return;
-            el.className=`message ${type}`; el.textContent=msg; el.style.display='block';
-            setTimeout(()=>el.style.display='none',duration);
+    storage: {
+        binId: '68d9759343b1c97be9534096',
+        secretKey: '$2a$10$.VfV1dtToI6avt7SnG5wrOOcedq9PeSWWwN4Iq8m7mcWZMCB5ZSFS',
+        async save() {
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${this.binId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': this.secretKey
+                    },
+                    body: JSON.stringify(App.data)
+                });
+            } catch(e) { console.error('Opslaan mislukt:', e); }
         },
-        showLogin(){
+        async load() {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${this.binId}/latest`, {
+                    headers: { 'X-Master-Key': this.secretKey }
+                });
+                const json = await res.json();
+                if(json && json.record) App.data = json.record;
+            } catch(e) { console.error('Laden mislukt:', e); }
+        }
+    },
+    ui: {
+        showMessage(id,msg,type='error',dur=5000) {
+            const el = document.getElementById(id);
+            if(!el) return;
+            el.className=`message ${type}`; el.textContent=msg; el.style.display='block';
+            setTimeout(()=>el.style.display='none',dur);
+        },
+        showLogin() {
             document.getElementById('loginScreen').classList.add('active');
             document.getElementById('dashboardScreen').classList.remove('active');
-            document.getElementById('loginForm').reset();
         },
-        showDashboard(){
+        showDashboard() {
             document.getElementById('loginScreen').classList.remove('active');
             document.getElementById('dashboardScreen').classList.add('active');
             App.ui.updateUserDisplay();
             App.ui.showTab('dashboard');
+            App.ui.renderStaff();
         },
-        showTab(tab){
+        showTab(tab) {
             document.querySelectorAll('.main-content').forEach(t=>t.classList.remove('active'));
-            const target=document.getElementById(tab+'Tab'); if(target) target.classList.add('active');
+            document.getElementById(tab+'Tab')?.classList.add('active');
             document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
-            const btn=document.querySelector(`[data-tab="${tab}"]`); if(btn) btn.classList.add('active');
-            if(tab==='staff') App.ui.refreshStaffTable();
+            document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
         },
-        updateUserDisplay(){
-            const el=document.getElementById('currentUserName');
-            const staffBtn=document.getElementById('staffTabBtn');
-            if(App.data.currentUser){
-                el.textContent=App.data.currentUser.email;
-                if(App.data.currentUser.role==='admin') staffBtn.classList.remove('hidden');
-                else staffBtn.classList.add('hidden');
-            }
+        updateUserDisplay() {
+            const el = document.getElementById('currentUserName');
+            el.textContent = App.data.currentUser?.email||'gebruiker';
+            const staffBtn = document.getElementById('staffTabBtn');
+            staffBtn.style.display = App.data.currentUser?.role==='admin'?'inline-block':'none';
         },
-        refreshStaffTable(){
-            const tbody=document.getElementById('staffTableBody');
-            const countEl=document.getElementById('staffCount');
-            if(!tbody || !countEl) return;
-            tbody.innerHTML='';
-            countEl.textContent=`${App.data.staff.length} staffleden`;
-            App.data.staff.forEach((user,index)=>{
-                const lastActive=new Date(user.lastActive).toLocaleString('nl-NL');
-                const isCurrent=App.data.currentUser && App.data.currentUser.email===user.email;
-                const row=document.createElement('tr');
-                row.innerHTML=`<td>${user.email}</td><td><span class="role-badge ${user.role}">${user.role==='admin'?'Administrator':'Kijker'}</span></td><td>${lastActive}</td><td><div class="user-actions">${!isCurrent?`<button class="btn btn-danger btn-small delete-user-btn" data-user-index="${index}">Verwijder</button>`:'<em>Huidige gebruiker</em>'}</div></td>`;
-                tbody.appendChild(row);
+        renderStaff() {
+            const container = document.getElementById('staffList');
+            if(!container) return;
+            container.innerHTML='';
+            App.data.users.filter(u=>u.role==='admin').forEach(u=>{
+                const btn=document.createElement('button');
+                btn.textContent=u.email;
+                btn.className='btn btn-primary btn-full';
+                btn.onclick=()=>alert(`Info over ${u.email} komt hier`); // placeholder
+                container.appendChild(btn);
             });
-            document.querySelectorAll('.delete-user-btn').forEach(btn=>btn.addEventListener('click',function(){
-                const idx=parseInt(this.getAttribute('data-user-index'));
-                App.auth.removeStaff(idx);
-            }));
-        },
-        toggleTheme(){
-            App.data.isDarkMode=!App.data.isDarkMode;
-            const toggle=document.getElementById('themeToggle');
-            if(App.data.isDarkMode){ document.body.removeAttribute('data-theme'); toggle.classList.remove('active'); }
-            else{ document.body.setAttribute('data-theme','light'); toggle.classList.add('active'); }
-            App.storage.save();
-        },
-        toggleUserMenu(){ document.getElementById('userDropdown').classList.toggle('show'); }
-    },
-    auth:{
-        login(email,password){
-            const user=App.data.staff.find(u=>u.email===email && u.password===password);
-            if(user){ App.data.currentUser=user; user.lastActive=new Date().toISOString(); App.storage.save(); App.ui.showDashboard(); }
-            else App.ui.showMessage('loginMessage','Email of wachtwoord ongeldig','error');
-        },
-        logout(){ App.data.currentUser=null; App.storage.save(); App.ui.showLogin(); },
-        addStaff(email,role,password){
-            if(!App.data.currentUser || App.data.currentUser.role!=='admin'){ App.ui.showMessage('addStaffMessage','Alleen admin kan staff toevoegen','error'); return; }
-            if(App.data.staff.find(u=>u.email===email)){ App.ui.showMessage('addStaffMessage','Deze gebruiker bestaat al','error'); return; }
-            App.data.staff.push({email,password,role,lastActive:new Date().toISOString()}); App.storage.save();
-            App.ui.showMessage('addStaffMessage','Stafflid toegevoegd','success'); document.getElementById('addStaffForm').reset();
-            App.ui.refreshStaffTable();
-        },
-        removeStaff(index){
-            if(!App.data.currentUser || App.data.currentUser.role!=='admin'){ App.ui.showMessage('addStaffMessage','Alleen admin kan staff verwijderen','error'); return; }
-            App.data.staff.splice(index,1); App.storage.save(); App.ui.refreshStaffTable();
-        },
-        changePassword(current,newP,confirm){
-            if(!App.data.currentUser){ App.ui.showMessage('passwordMessage','Niet ingelogd','error'); return; }
-            if(App.data.currentUser.password!==current){ App.ui.showMessage('passwordMessage','Huidig wachtwoord incorrect','error'); return; }
-            if(newP!==confirm){ App.ui.showMessage('passwordMessage','Wachtwoorden komen niet overeen','error'); return; }
-            App.data.currentUser.password=newP; App.storage.save(); App.ui.showMessage('passwordMessage','Wachtwoord gewijzigd','success'); document.getElementById('passwordForm').reset();
         }
     },
-    init(){
-        App.storage.load();
+    auth: {
+        login(email,password) {
+            const user = App.data.users.find(u=>u.email===email && u.password===password);
+            if(user){
+                user.lastActive=new Date().toISOString();
+                App.data.currentUser={...user};
+                App.storage.save();
+                App.ui.showDashboard();
+                return true;
+            }else{
+                App.ui.showMessage('loginMessage','Ongeldig email/wachtwoord');
+                return false;
+            }
+        },
+        logout() {
+            App.data.currentUser=null;
+            App.storage.save();
+            App.ui.showLogin();
+        },
+        addUser(email,password,role){
+            if(!email||!password||!role){
+                App.ui.showMessage('addUserMessage','Alle velden verplicht'); return false;
+            }
+            if(App.data.users.find(u=>u.email===email)){
+                App.ui.showMessage('addUserMessage','Gebruiker bestaat al'); return false;
+            }
+            App.data.users.push({email,password,role,lastActive:new Date().toISOString()});
+            App.storage.save();
+            App.ui.showMessage('addUserMessage',`${email} toegevoegd`,'success');
+            document.getElementById('addUserForm')?.reset();
+            return true;
+        }
+    },
+    async init(){
+        await App.storage.load();
+
+        if(!App.data.isDarkMode){
+            document.body.setAttribute('data-theme','light');
+            document.getElementById('themeToggle')?.classList.add('active');
+        }
+
+        document.getElementById('loginForm')?.addEventListener('submit',e=>{
+            e.preventDefault();
+            const email=document.getElementById('loginEmail').value.trim();
+            const pass=document.getElementById('loginPassword').value;
+            App.auth.login(email,pass);
+        });
+
+        document.getElementById('addUserForm')?.addEventListener('submit',e=>{
+            e.preventDefault();
+            const email=document.getElementById('addUserEmail').value.trim();
+            const pass=document.getElementById('addUserPassword').value;
+            const role=document.getElementById('addUserRole').value;
+            App.auth.addUser(email,pass,role);
+        });
+
+        document.querySelectorAll('.nav-tab').forEach(btn=>{
+            btn.addEventListener('click',()=>App.ui.showTab(btn.getAttribute('data-tab')));
+        });
+
+        document.getElementById('userMenuButton')?.addEventListener('click',e=>{
+            e.stopPropagation(); 
+            document.getElementById('userDropdown')?.classList.toggle('show');
+        });
+
+        document.getElementById('logoutButton')?.addEventListener('click',e=>{
+            e.preventDefault(); App.auth.logout();
+        });
+
+        document.getElementById('themeToggle')?.addEventListener('click',()=>{
+            App.data.isDarkMode=!App.data.isDarkMode;
+            if(App.data.isDarkMode){
+                document.body.removeAttribute('data-theme');
+                document.getElementById('themeToggle')?.classList.remove('active');
+            }else{
+                document.body.setAttribute('data-theme','light');
+                document.getElementById('themeToggle')?.classList.add('active');
+            }
+            App.storage.save();
+        });
+
+        document.addEventListener('click',()=>{
+            document.getElementById('userDropdown')?.classList.remove('show');
+        });
+
         if(App.data.currentUser) App.ui.showDashboard();
         else App.ui.showLogin();
-
-        document.getElementById('loginForm').addEventListener('submit',e=>{ e.preventDefault(); App.auth.login(document.getElementById('loginEmail').value,document.getElementById('loginPassword').value); });
-        document.getElementById('logoutButton').addEventListener('click',e=>{ e.preventDefault(); App.auth.logout(); });
-        document.getElementById('addStaffForm').addEventListener('submit',e=>{ e.preventDefault(); App.auth.addStaff(document.getElementById('addStaffEmail').value,document.getElementById('addStaffRole').value,document.getElementById('addStaffPassword').value); });
-        document.getElementById('passwordForm').addEventListener('submit',e=>{ e.preventDefault(); App.auth.changePassword(document.getElementById('currentPasswordInput').value,document.getElementById('newPasswordInput').value,document.getElementById('confirmPasswordInput').value); });
-        document.querySelectorAll('.nav-tab').forEach(btn=>btn.addEventListener('click',()=>App.ui.showTab(btn.dataset.tab)));
-        document.getElementById('themeToggle').addEventListener('click',()=>App.ui.toggleTheme());
-        document.getElementById('userMenuButton').addEventListener('click',()=>App.ui.toggleUserMenu());
-        document.addEventListener('click',e=>{ if(!e.target.closest('.user-menu')) document.getElementById('userDropdown').classList.remove('show'); });
     }
 };
 
