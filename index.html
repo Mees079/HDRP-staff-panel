@@ -20,11 +20,11 @@
       <form id="loginForm">
         <div class="form-group">
           <label for="loginEmail" class="form-label">Email Adres</label>
-          <input type="text" id="loginEmail" class="form-input" required placeholder="Typ je email" title="Email">
+          <input type="text" id="loginEmail" class="form-input" required autocomplete="username" placeholder="Typ je email" title="Email adres">
         </div>
         <div class="form-group">
           <label for="loginPassword" class="form-label">Wachtwoord</label>
-          <input type="password" id="loginPassword" class="form-input" required placeholder="Typ je wachtwoord" title="Wachtwoord">
+          <input type="password" id="loginPassword" class="form-input" required autocomplete="current-password" placeholder="Typ je wachtwoord" title="Wachtwoord">
         </div>
         <button type="submit" class="btn btn-primary btn-full">Inloggen</button>
       </form>
@@ -34,7 +34,6 @@
 
 <!-- Dashboard Screen -->
 <div id="dashboardScreen" class="screen">
-  <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-brand">Security Monitoring System</div>
     <div class="nav-tabs">
@@ -174,16 +173,16 @@
         <form id="passwordForm">
           <div class="form-group">
             <label for="currentPasswordInput" class="form-label">Huidig Wachtwoord</label>
-            <input type="password" id="currentPasswordInput" class="form-input" required placeholder="Huidig wachtwoord" title="Huidig wachtwoord">
+            <input type="password" id="currentPasswordInput" class="form-input" required autocomplete="current-password" placeholder="Huidig wachtwoord" title="Huidig wachtwoord">
           </div>
           <div class="form-grid">
             <div class="form-group">
               <label for="newPasswordInput" class="form-label">Nieuw Wachtwoord</label>
-              <input type="password" id="newPasswordInput" class="form-input" required placeholder="Nieuw wachtwoord" title="Nieuw wachtwoord">
+              <input type="password" id="newPasswordInput" class="form-input" required autocomplete="new-password" placeholder="Nieuw wachtwoord" title="Nieuw wachtwoord">
             </div>
             <div class="form-group">
               <label for="confirmPasswordInput" class="form-label">Bevestig Nieuw Wachtwoord</label>
-              <input type="password" id="confirmPasswordInput" class="form-input" required placeholder="Bevestig wachtwoord" title="Bevestig nieuw wachtwoord">
+              <input type="password" id="confirmPasswordInput" class="form-input" required autocomplete="new-password" placeholder="Bevestig wachtwoord" title="Bevestig nieuw wachtwoord">
             </div>
           </div>
           <button type="submit" class="btn btn-primary">🔑 Wachtwoord Wijzigen</button>
