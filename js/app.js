@@ -16,21 +16,23 @@ function loadData() {
   const storedUsers = localStorage.getItem("users");
   const storedUser = localStorage.getItem("currentUser");
 
-  if (storedUsers) users = JSON.parse(storedUsers);
-  else {
+  if(storedUsers) {
+    users = JSON.parse(storedUsers);
+  } else {
+    // Alleen als localStorage leeg is, initialiseren met default users
     users = [
       { email: "mees", password: "mees", role: "admin", lastActive: new Date().toISOString() },
       { email: "demo", password: "demo", role: "viewer", lastActive: new Date().toISOString() }
     ];
   }
 
-  if (storedUser) currentUser = JSON.parse(storedUser);
+  if(storedUser) currentUser = JSON.parse(storedUser);
 }
 
-loadData();
+loadData(); // Dit moet **voordat DOMContentLoaded** is aangeroepen
 
 // ======================
-// ELEMENTS
+// DOM & FUNCTIONS
 // ======================
 document.addEventListener("DOMContentLoaded", function() {
   const loginForm = document.getElementById("loginForm");
