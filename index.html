@@ -5,98 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HDRP Staff Panel</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background:#f5f5f5; }
-    .hidden { display: none; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
     .active { display: block; }
-    .login-screen, .dashboard-screen { padding: 20px; }
-    .main-content { display: none; }
-    .nav-tab { cursor: pointer; margin-right: 10px; padding: 5px 10px; background:#ccc; display:inline-block; }
-    .nav-tab.active { background:#999; color:white; }
-    .btn { padding: 5px 10px; cursor:pointer; }
-    .btn-danger { background:#e74c3c; color:white; border:none; }
-    .btn-small { font-size:0.8em; }
-    .role-badge.admin { background:#3498db; color:white; padding:2px 5px; border-radius:3px; }
-    .role-badge.viewer { background:#2ecc71; color:white; padding:2px 5px; border-radius:3px; }
-    .message { margin:10px 0; display:none; padding:5px; border-radius:3px; }
-    .message.error { background:#e74c3c; color:white; }
-    .message.success { background:#2ecc71; color:white; }
-    .light-theme { background:white; color:black; }
-    input, select { padding:5px; margin:5px 0; width:200px; display:block; }
+    #loginScreen, #dashboardScreen { display: none; }
+    .hidden { display: none; }
+    .message { margin: 10px 0; padding: 5px; border-radius: 3px; }
+    .error { background-color: #fdd; color: #900; }
+    .success { background-color: #dfd; color: #090; }
+    .role-badge.admin { background-color: red; color: white; padding: 2px 5px; border-radius: 3px; }
+    .role-badge.viewer { background-color: blue; color: white; padding: 2px 5px; border-radius: 3px; }
   </style>
 </head>
 <body>
 
-<!-- ======================
-     LOGIN SCREEN
-====================== -->
-<div id="loginScreen" class="login-screen active">
-  <h2>Login</h2>
-  <form id="loginForm">
-    <input type="text" id="loginEmail" placeholder="E-mail" required autocomplete="username">
-    <input type="password" id="loginPassword" placeholder="Wachtwoord" required autocomplete="current-password">
-    <button type="submit" class="btn">Inloggen</button>
-  </form>
-  <div id="loginMessage" class="message"></div>
-</div>
-
-<!-- ======================
-     DASHBOARD SCREEN
-====================== -->
-<div id="dashboardScreen" class="dashboard-screen hidden">
-  <h2>Dashboard</h2>
-  <p>Ingelogd als: <span id="currentUserName"></span></p>
-  <button id="logoutButton" class="btn btn-danger">Uitloggen</button>
-  <button id="themeToggle" class="btn">Thema wisselen</button>
-
-  <div style="margin-top:20px;">
-    <span class="nav-tab active" data-tab="dashboard">Dashboard</span>
-    <span class="nav-tab" data-tab="users" id="usersTabBtn" class="hidden">Gebruikers</span>
-    <span class="nav-tab" data-tab="password">Wachtwoord wijzigen</span>
-  </div>
-
-  <!-- Dashboard Tab -->
-  <div id="dashboardTab" class="main-content active">
-    <h3>Welkom op het dashboard</h3>
-    <p>Hier kun je gegevens bekijken en beheren.</p>
-  </div>
-
-  <!-- Users Tab -->
-  <div id="usersTab" class="main-content">
-    <h3>Gebruikersbeheer</h3>
-    <form id="addUserForm">
-      <input type="text" id="addUserEmail" placeholder="E-mail" required>
-      <input type="password" id="addUserPassword" placeholder="Wachtwoord" required>
-      <select id="addUserRole" required>
-        <option value="">Kies rol</option>
-        <option value="admin">Admin</option>
-        <option value="viewer">Viewer</option>
-      </select>
-      <button type="submit" class="btn">Gebruiker toevoegen</button>
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="active">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="text" id="loginEmail" placeholder="Email" required>
+      <input type="password" id="loginPassword" placeholder="Wachtwoord" required>
+      <button type="submit">Login</button>
     </form>
-    <div id="addUserMessage" class="message"></div>
-
-    <h4>Huidige gebruikers (<span id="userCount"></span>)</h4>
-    <table border="1" cellpadding="5">
-      <thead>
-        <tr><th>E-mail</th><th>Rol</th><th>Laatste activiteit</th><th>Acties</th></tr>
-      </thead>
-      <tbody id="userTableBody"></tbody>
-    </table>
+    <div id="loginMessage" class="message"></div>
   </div>
 
-  <!-- Password Tab -->
-  <div id="passwordTab" class="main-content">
-    <h3>Wachtwoord wijzigen</h3>
-    <form id="passwordForm">
-      <input type="password" id="currentPasswordInput" placeholder="Huidig wachtwoord" required autocomplete="current-password">
-      <input type="password" id="newPasswordInput" placeholder="Nieuw wachtwoord" required autocomplete="new-password">
-      <input type="password" id="confirmPasswordInput" placeholder="Bevestig nieuw wachtwoord" required autocomplete="new-password">
-      <button type="submit" class="btn">Wijzigen</button>
-    </form>
-    <div id="passwordMessage" class="message"></div>
-  </div>
-</div>
+  <!-- DASHBOARD SCREEN -->
+  <div id="dashboardScreen">
+    <h2>Dashboard</h2>
+    <p>Ingelogd als: <span id="currentUserName"></span></p>
+    <button id="logoutButton">Logout</button>
 
-<script src="script.js"></script>
+    <!-- Tabs -->
+    <div>
+      <button class="nav-tab" data-tab="dashboard">Dashboard</button>
+      <button class="nav-tab hidden" id="usersTabBtn" data-tab="users">Users</button>
+    </div>
+
+    <!-- Dashboard content -->
+    <div id="dashboardTab" class="main-content active">
+      <p>Welkom op het dashboard!</p>
+    </div>
+
+    <!-- Users tab -->
+    <div id="usersTab" class="main-content">
+      <h3>Gebruikers</h3>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Laatste activiteit</th>
+            <th>Acties</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
+      <p id="userCount"></p>
+
+      <h4>Nieuwe gebruiker toevoegen</h4>
+      <form id="addUserForm">
+        <input type="text" id="addUserEmail" placeholder="Email" required>
+        <input type="password" id="addUserPassword" placeholder="Wachtwoord" required>
+        <select id="addUserRole" required>
+          <option value="">Kies rol</option>
+          <option value="admin">Admin</option>
+          <option value="viewer">Viewer</option>
+        </select>
+        <button type="submit">Toevoegen</button>
+      </form>
+      <div id="addUserMessage" class="message"></div>
+    </div>
+
+    <!-- Wachtwoord wijzigen -->
+    <div>
+      <h4>Wijzig wachtwoord</h4>
+      <form id="passwordForm">
+        <input type="password" id="currentPasswordInput" placeholder="Huidig wachtwoord" required>
+        <input type="password" id="newPasswordInput" placeholder="Nieuw wachtwoord" required>
+        <button type="submit">Wijzig wachtwoord</button>
+      </form>
+      <div id="passwordMessage" class="message"></div>
+    </div>
+
+    <!-- Theme toggle -->
+    <button id="themeToggle">Toggle Light/Dark Theme</button>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
