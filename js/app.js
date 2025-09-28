@@ -1,10 +1,34 @@
 document.addEventListener("DOMContentLoaded", function() {
-  const users = [
+  // ======================
+  // DATA & STORAGE
+  // ======================
+  let users = [
     { email: "mees", password: "mees", role: "admin", lastActive: new Date().toISOString() },
     { email: "demo", password: "demo", role: "viewer", lastActive: new Date().toISOString() }
   ];
   let currentUser = null;
 
+  function saveData() {
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("currentUser", currentUser ? JSON.stringify(currentUser) : null);
+  }
+
+  function loadData() {
+    const storedUsers = localStorage.getItem("users");
+    const storedUser = localStorage.getItem("currentUser");
+
+    if(storedUsers) {
+      users = JSON.parse(storedUsers);
+    }
+
+    if(storedUser) currentUser = JSON.parse(storedUser);
+  }
+
+  loadData(); // laad data bij start
+
+  // ======================
+  // ELEMENTS
+  // ======================
   const loginForm = document.getElementById("loginForm");
   const loginEmail = document.getElementById("loginEmail");
   const loginPassword = document.getElementById("loginPassword");
@@ -20,6 +44,9 @@ document.addEventListener("DOMContentLoaded", function() {
   const addUserForm = document.getElementById("addUserForm");
   const themeToggle = document.getElementById("themeToggle");
 
+  // ======================
+  // HELPERS
+  // ======================
   function showMessage(element, message, type="error") {
     element.textContent = message;
     element.className = "message " + type;
@@ -53,10 +80,14 @@ document.addEventListener("DOMContentLoaded", function() {
     userCount.textContent=`${users.length} gebruikers`;
   }
 
+  // ======================
+  // AUTHENTICATION
+  // ======================
   function login(email,password) {
     const user=users.find(u=>u.email===email && u.password===password);
     if(user){
       currentUser=user;
+      saveData(); // opslaan van sessie
       loginScreen.classList.remove("active");
       dashboardScreen.classList.add("active");
       currentUserName.textContent=currentUser.email;
@@ -69,6 +100,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function logout() {
     currentUser=null;
+    saveData(); // update sessie
     loginScreen.classList.add("active");
     dashboardScreen.classList.remove("active");
     loginForm.reset();
@@ -84,6 +116,7 @@ document.addEventListener("DOMContentLoaded", function() {
       return;
     }
     users.push({email,password,role,lastActive:new Date().toISOString()});
+    saveData(); // opslaan nieuwe gebruiker
     showMessage(document.getElementById("addUserMessage"),"Gebruiker toegevoegd","success");
     addUserForm.reset();
     refreshUserTable();
@@ -92,11 +125,17 @@ document.addEventListener("DOMContentLoaded", function() {
   window.deleteUser=function(email){
     if(confirm("Weet je zeker dat je deze gebruiker wilt verwijderen?")){
       const idx=users.findIndex(u=>u.email===email);
-      if(idx!==-1) users.splice(idx,1);
+      if(idx!==-1) {
+        users.splice(idx,1);
+        saveData(); // opslaan na verwijderen
+      }
       refreshUserTable();
     }
   }
 
+  // ======================
+  // EVENT LISTENERS
+  // ======================
   loginForm.addEventListener("submit", function(e){
     e.preventDefault();
     login(loginEmail.value,loginPassword.value);
@@ -118,4 +157,15 @@ document.addEventListener("DOMContentLoaded", function() {
   themeToggle.addEventListener("click", function(){
     document.body.classList.toggle("light-theme");
   });
+
+  // ======================
+  // AUTO-LOGIN IF SESSION EXISTS
+  // ======================
+  if(currentUser){
+    loginScreen.classList.remove("active");
+    dashboardScreen.classList.add("active");
+    currentUserName.textContent=currentUser.email;
+    if(currentUser.role==="admin") usersTabBtn.classList.remove("hidden");
+    showTab("dashboard");
+  }
 });
