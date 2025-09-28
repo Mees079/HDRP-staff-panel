@@ -5,8 +5,8 @@ const App = {
         isDarkMode: true
     },
     config: {
-        JSONBIN_ID: 'YOUR_BIN_ID',          // Zet hier je JSONBin ID
-        JSONBIN_KEY: 'YOUR_SECRET_KEY'      // Zet hier je X-Master-Key
+        JSONBIN_ID: '68d9759343b1c97be9534096',          // Zet hier je JSONBin ID
+        JSONBIN_KEY: '$2a$10$DTiU3hcuglHpTy/sU3hUKuHWnX7exTTkb6/eahL2zr9cyIwo9feTK'      // Zet hier je X-Master-Key
     },
     storage: {
         saveLocal() {
