@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Security Monitoring System</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginScreen" class="screen active">
+    <div class="login-container">
+      <h1>Security Monitoring System</h1>
+      <form id="loginForm" class="card">
+        <label>Email</label>
+        <input type="text" id="loginEmail" required />
+        <label>Wachtwoord</label>
+        <input type="password" id="loginPassword" required />
+        <button type="submit" class="btn btn-primary">Login</button>
+        <div id="loginMessage" class="message"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboardScreen" class="screen">
+    <nav class="navbar">
+      <div class="logo">Security Monitoring</div>
+      <div class="nav-links">
+        <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
+        <button class="nav-tab" id="usersTabBtn" data-tab="users">Gebruikers</button>
+        <button class="nav-tab" data-tab="settings">Instellingen</button>
+      </div>
+      <div class="user-menu">
+        <span id="currentUserName"></span>
+        <button id="userMenuButton">⚙️</button>
+        <div id="userDropdown" class="dropdown">
+          <button id="logoutButton">Uitloggen</button>
+        </div>
+      </div>
+      <div id="themeToggle" class="theme-toggle"></div>
+    </nav>
+
+    <main class="main">
+      <!-- Dashboard -->
+      <section id="dashboardTab" class="main-content active">
+        <h2>Welkom bij het Security Monitoring System</h2>
+        <p>Hier komen beveiligingsgegevens en meldingen.</p>
+      </section>
+
+      <!-- Gebruikers -->
+      <section id="usersTab" class="main-content">
+        <h2>Gebruikersbeheer</h2>
+        <div id="userCount"></div>
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>Email</th><th>Rol</th><th>Laatst actief</th><th>Acties</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+
+        <h3>Nieuwe gebruiker toevoegen</h3>
+        <form id="addUserForm">
+          <input type="text" id="addUserEmail" placeholder="Email" />
+          <input type="text" id="addUserPassword" placeholder="Wachtwoord" />
+          <select id="addUserRole">
+            <option value="viewer">Kijker</option>
+            <option value="admin">Administrator</option>
+          </select>
+          <button type="submit" class="btn btn-primary">Toevoegen</button>
+        </form>
+        <div id="addUserMessage" class="message"></div>
+      </section>
+
+      <!-- Instellingen -->
+      <section id="settingsTab" class="main-content">
+        <h2>Instellingen</h2>
+        <h3>Wachtwoord wijzigen</h3>
+        <form id="passwordForm">
+          <input type="password" id="currentPasswordInput" placeholder="Huidig wachtwoord" />
+          <input type="password" id="newPasswordInput" placeholder="Nieuw wachtwoord" />
+          <input type="password" id="confirmPasswordInput" placeholder="Bevestig nieuw wachtwoord" />
+          <button type="submit" class="btn btn-primary">Wijzigen</button>
+        </form>
+        <div id="passwordMessage" class="message"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

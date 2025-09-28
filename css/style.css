@@ -1,0 +1,112 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #fff;
+}
+[data-theme="light"] {
+  background-color: #f5f5f5;
+  color: #222;
+}
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1e1e1e;
+  padding: 10px 20px;
+}
+[data-theme="light"] .navbar { background: #e0e0e0; }
+
+.logo { font-weight: bold; }
+
+.nav-links button {
+  margin-right: 10px;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 6px 12px;
+}
+.nav-links button.active {
+  border-bottom: 2px solid #4caf50;
+}
+
+.user-menu { position: relative; }
+.dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  background: #1e1e1e;
+  padding: 10px;
+}
+.dropdown.show { display: block; }
+[data-theme="light"] .dropdown { background: #fff; }
+
+.theme-toggle {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: #4caf50;
+  cursor: pointer;
+}
+
+.main { padding: 20px; }
+.main-content { display: none; }
+.main-content.active { display: block; }
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.btn-primary { background: #4caf50; color: #fff; }
+.btn-danger  { background: #e53935; color: #fff; }
+.btn-small   { padding: 4px 8px; font-size: 0.85em; }
+
+.message {
+  margin-top: 10px;
+  padding: 6px;
+  border-radius: 4px;
+  display: none;
+}
+.message.success { background: #4caf50; }
+.message.error   { background: #e53935; }
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.user-table th, .user-table td {
+  border: 1px solid #444;
+  padding: 8px;
+  text-align: left;
+}
+[data-theme="light"] .user-table th,
+[data-theme="light"] .user-table td {
+  border: 1px solid #ccc;
+}
+
+.role-badge.admin  { color: #fff; background: #4caf50; padding: 2px 6px; border-radius: 4px; }
+.role-badge.viewer { color: #fff; background: #2196f3; padding: 2px 6px; border-radius: 4px; }
+
+.card {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 6px;
+  max-width: 300px;
+  margin: auto;
+}
+[data-theme="light"] .card { background: #fff; }
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 4px;
+}
