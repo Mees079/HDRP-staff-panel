@@ -5,19 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HDRP Staff Panel</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .screen { display: none; }
-    </style>
 </head>
 <body>
 
 <!-- Login Screen -->
-<div id="loginScreen" class="screen">
+<div id="loginScreen" class="screen active">
     <div class="login-container">
         <div class="login-box">
             <div class="login-header">
                 <h1>HDRP Staff Panel</h1>
-                <p>Account aanvragen kan via Discord of mailen naar Hoofddorproleplay@outlook.com.</p>
+                <p>Account aanvragen via Discord of mail naar Hoofddorproleplay@outlook.com</p>
             </div>
             <div id="loginMessage" class="message"></div>
             <form id="loginForm">
@@ -41,11 +38,8 @@
         <div class="topbar-brand">HDRP Staff Panel</div>
         <div class="nav-tabs">
             <button class="nav-tab active" data-tab="dashboard">📊 Dashboard</button>
-            <button class="nav-tab" id="usersTabBtn" data-tab="users">👥 Gebruikers</button>
-            <button class="nav-tab" id="staffTabBtn" data-tab="staffManage">👑 Staff Team Beheren</button>
-            <button class="nav-tab" data-tab="livePlayers">🎮 Live Spelers</button>
-            <button class="nav-tab" data-tab="antiCheat">🛡️ Anti-Cheat</button>
-            <button class="nav-tab" data-tab="logs">📜 Logs</button>
+            <button class="nav-tab hidden" id="usersTabBtn" data-tab="users">👥 Gebruikers</button>
+            <button class="nav-tab hidden" id="staffTabBtn" data-tab="staffManage">👤 Staff Beheren</button>
             <button class="nav-tab" data-tab="settings">⚙️ Instellingen</button>
         </div>
         <div class="topbar-actions">
@@ -65,7 +59,19 @@
         <div class="container">
             <div class="page-header">
                 <h1>Dashboard</h1>
-                <p>Real-time monitoring</p>
+                <p>Real-time overzicht van het staff panel</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📌</div>
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Meldingen</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">Actieve Gebruikers</div>
+                </div>
             </div>
         </div>
     </div>
@@ -74,7 +80,7 @@
     <div id="usersTab" class="main-content">
         <div class="container">
             <div class="page-header">
-                <h1>Gebruikersbeheer</h1>
+                <h1>Gebruikers Beheren</h1>
                 <p>Beheer toegang en permissies van gebruikers</p>
             </div>
             <div class="card">
@@ -128,27 +134,61 @@
     <div id="staffManageTab" class="main-content">
         <div class="container">
             <div class="page-header">
-                <h1>Staff Team Beheren</h1>
-                <p>Alle staffleden beheren (alleen zichtbaar voor admins)</p>
+                <h1>Staff Beheren</h1>
+                <p>Beheer staff accounts (alleen voor admins)</p>
             </div>
-            <div id="staffManageGrid" class="staff-grid"></div>
-            <div id="staffManageInfo" class="card hidden">
-                <h2 id="staffManageName"></h2>
-                <p id="staffManageDetails"></p>
-                <button class="btn btn-danger" id="removeStaffBtn">❌ Verwijderen</button>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Nieuwe Staff Toevoegen</h2>
+                </div>
+                <div id="addStaffMessage" class="message"></div>
+                <form id="addStaffForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Email/Gebruikersnaam</label>
+                            <input type="text" id="addStaffEmail" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rol</label>
+                            <select id="addStaffRole" class="form-select" required>
+                                <option value="">Selecteer rol</option>
+                                <option value="admin">Administrator</option>
+                                <option value="viewer">Kijker</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tijdelijk Wachtwoord</label>
+                        <input type="password" id="addStaffPassword" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">👤 Staff Toevoegen</button>
+                </form>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Bestaande Staff</h2>
+                    <span id="staffCount">0 staffleden</span>
+                </div>
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>Email/Gebruiker</th>
+                            <th>Rol</th>
+                            <th>Laatst Actief</th>
+                            <th>Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffTableBody"></tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Live Players / Anti-Cheat / Logs / Settings Tabs -->
-    <div id="livePlayersTab" class="main-content"><div class="container"><h2>Live Spelers (komt later)</h2></div></div>
-    <div id="antiCheatTab" class="main-content"><div class="container"><h2>Anti-Cheat (komt later)</h2></div></div>
-    <div id="logsTab" class="main-content"><div class="container"><h2>Logs (komt later)</h2></div></div>
+    <!-- Settings Tab -->
     <div id="settingsTab" class="main-content">
         <div class="container">
             <div class="page-header">
                 <h1>Instellingen</h1>
-                <p>Personalisatie en account instellingen</p>
             </div>
             <div class="card">
                 <div class="setting-item">
@@ -161,7 +201,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <script src="js/app.js"></script>
